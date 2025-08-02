@@ -67,7 +67,7 @@ export function TypingTextArea({
       }
 
       // Preserve all whitespace characters
-      let displayChar = char;
+      let displayChar: React.ReactNode = char;
       if (char === " ") {
         displayChar = "\u00A0"; // Non-breaking space
       } else if (char === "\t") {
@@ -81,7 +81,7 @@ export function TypingTextArea({
       nodes.push(
         <span
           key={idx}
-          className={cn("font-mono transition-colors", className)}
+          className={cn("font-mono tracking-wide transition-colors", className)}
           style={{ whiteSpace: "pre" }} // Preserve whitespace
         >
           {displayChar}
@@ -116,15 +116,16 @@ export function TypingTextArea({
   };
 
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardContent className="px-4 sm:px-6">
         {mode === "input" ? (
           <>
             <Textarea
               placeholder="Paste your text or code here to practice typing..."
-              className=" font-mono resize-none focus:ring-2 focus:ring-primary/20 h-[300px] "
+              className="font-mono resize-none h-[350px] tracking-wide"
               value={referenceText}
               style={{ scrollbarWidth: "none" }}
+              spellCheck={false}
               onChange={(e) => onReferenceTextChange(e.target.value)}
             />
 
@@ -158,7 +159,7 @@ export function TypingTextArea({
               <ScrollArea
                 className={cn(
                   // Base textarea styles from shadcn
-                  "h-[300px] border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
+                  "h-[350px] border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
                   // Typing-specific overrides
                   "font-mono resize-none select-none overflow-auto break-words leading-relaxed focus-within:border-primary/50"
                 )}

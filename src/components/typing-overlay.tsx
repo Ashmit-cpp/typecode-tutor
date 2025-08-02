@@ -131,13 +131,13 @@ export function TypingOverlay() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 h-full">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
-        <Card className="flex flex-col lg:flex-row justify-between w-full items-center h-auto shadow-lg">
+        <Card className="flex flex-col lg:flex-row justify-between w-full items-center" >
           {mode === "input" ? (
             <>
               <CardHeader className="flex flex-row justify-between w-full">
-                <CardTitle className="flex flex-col items-start gap-2 text-lg sm:text-xl">
+                <CardTitle className="flex flex-col items-start gap-0 text-lg sm:text-xl">
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-primary" />
                     Setup Your Practice
@@ -151,11 +151,11 @@ export function TypingOverlay() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <h3 className="text-sm font-medium mb-3">Quick Start</h3>
-                <div className="space-y-2">
+                <h3 className="text-sm font-medium mb-1">Quick Start</h3>
+                <div className="space-y-1">
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     onClick={pickRandom}
                     className="w-full justify-start"
                   >

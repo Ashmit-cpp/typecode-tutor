@@ -34,7 +34,7 @@ export function TypingStatsDisplay({
 }: TypingStatsProps) {
   if (mode === "typing") {
     return (
-      <Card className="shadow-lg">
+      <Card>
         <CardContent className="px-4">
           <h3 className="text-sm font-medium mb-3">Live Stats</h3>
           <div className="flex gap-4">
@@ -84,9 +84,9 @@ export function TypingStatsDisplay({
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardContent className="px-4">
-        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+        <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
           <Target className="w-4 h-4 text-primary" />
           Typing Tips
         </h3>

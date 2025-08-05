@@ -30,25 +30,25 @@ export function TypingStatsDisplay({ stats, mode }: TypingStatsProps) {
         <CardContent className="px-4">
           <h3 className="text-lg font-semibold mb-3">Live Stats</h3>
           <div className="flex gap-4">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/70 w-1/4">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-600" />
+                <TrendingUp className="w-4 h-4 text-blue-400" />
                 <span className="text-sm font-medium">WPM</span>
               </div>
-              <div className="text-lg font-bold text-blue-600">{stats.wpm}</div>
+              <div className="text-lg font-bold text-blue-400">{stats.wpm}</div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/70 w-1/4">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-green-600" />
+                <Target className="w-4 h-4 text-green-400" />
                 <span className="text-sm font-medium">Accuracy</span>
               </div>
-              <div className="text-lg font-bold text-green-600">
+              <div className="text-lg font-bold text-green-400">
                 {stats.accuracy}%
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/70 w-1/4">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
               <div className="flex items-center gap-2">
                 <Timer className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Time</span>
@@ -58,7 +58,7 @@ export function TypingStatsDisplay({ stats, mode }: TypingStatsProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/70 w-1/4">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
               <div className="flex items-center gap-2">
                 <XCircle className="w-4 h-4 text-destructive" />
                 <span className="text-sm font-medium">Errors</span>

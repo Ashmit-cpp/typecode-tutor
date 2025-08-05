@@ -151,7 +151,7 @@ export function TypingOverlay() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <h3 className="text-sm font-medium mb-1">Quick Start</h3>
+                <h3 className="text-md font-semibold mb-1">Quick Start</h3>
                 <div className="space-y-1">
                   <Button
                     size="sm"

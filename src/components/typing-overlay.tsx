@@ -133,9 +133,9 @@ export function TypingOverlay() {
     <div className="p-4 sm:p-6 lg:p-8 h-full">
       <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
-        <Card className="flex flex-col lg:flex-row justify-between w-full items-center" >
+        <Card className="" >
           {mode === "input" ? (
-            <>
+            <div className="flex flex-col lg:flex-row justify-between w-full items-center py-2">
               <CardHeader className="flex flex-row justify-between w-full">
                 <CardTitle className="flex flex-col items-start gap-0 text-lg sm:text-xl">
                   <div className="flex items-center gap-2">
@@ -155,7 +155,6 @@ export function TypingOverlay() {
                 <div className="space-y-1">
                   <Button
                     size="sm"
-                    variant="secondary"
                     onClick={pickRandom}
                     className="w-full justify-start"
                   >
@@ -164,7 +163,7 @@ export function TypingOverlay() {
                   </Button>
                 </div>
               </CardContent>
-            </>
+            </div>
           ) : (
             <ProgressCard
               progress={progress}
@@ -172,7 +171,6 @@ export function TypingOverlay() {
               totalChars={referenceText.length}
             />
           )}
-        </Card>
 
         {/* Text Area */}
         <TypingTextArea
@@ -188,6 +186,7 @@ export function TypingOverlay() {
           onClearText={clearText}
           onTryAgain={tryAgain}
         />
+        </Card>
 
         {/* Stats Display */}
         <TypingStatsDisplay

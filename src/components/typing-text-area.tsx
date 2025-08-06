@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { Play, RotateCcw, Trash2, CheckCircle } from "lucide-react";
 import type { TypingStats } from "./typing-stats";
 import { CardContent } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
 
 interface TypingTextAreaProps {
   mode: "input" | "typing";

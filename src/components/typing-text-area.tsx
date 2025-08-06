@@ -1,13 +1,14 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Play, RotateCcw, Trash2, CheckCircle } from "lucide-react";
 import type { TypingStats } from "./typing-stats";
-import { ScrollArea } from "./ui/scroll-area";
 import { CardContent } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface TypingTextAreaProps {
   mode: "input" | "typing";
@@ -36,80 +37,110 @@ export function TypingTextArea({
   onClearText,
   onTryAgain,
 }: TypingTextAreaProps) {
+  // Simple refs for container and cursor
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLSpanElement>(null);
+
+  // Simple auto-scroll to keep cursor centered
+  useLayoutEffect(() => {
+    if (!containerRef.current || !cursorRef.current || mode !== "typing") return;
+
+    const container = containerRef.current;
+    const cursor = cursorRef.current;
+
+    // Get positions
+    const containerHeight = 400; // We know this is 400px
+    const containerCenter = containerHeight / 2; // 200px
+    
+    const cursorRect = cursor.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    
+    // Calculate cursor position relative to container
+    const cursorRelativeTop = cursorRect.top - containerRect.top + container.scrollTop;
+    
+    // Calculate where cursor currently appears in the viewport
+    const cursorViewportPosition = cursorRelativeTop - container.scrollTop;
+    
+    // If cursor is not in the center zone (150px to 250px), scroll to center it
+    if (cursorViewportPosition < 150 || cursorViewportPosition > 250) {
+      const targetScrollTop = cursorRelativeTop - containerCenter;
+      container.scrollTop = Math.max(0, targetScrollTop);
+    }
+  }, [currentIndex, mode]);
+
+  // Render text with cursor
   const renderWithCursor = () => {
     const nodes: React.ReactNode[] = [];
     const chars = referenceText.split("");
 
     chars.forEach((char, idx) => {
-      // Add cursor before the current character
+      // Add cursor at current position
       if (idx === currentIndex && !isCompleted) {
         nodes.push(
           <span
             key={`cursor-${idx}`}
-            className="inline-block align-text-bottom border-l-2 border-primary"
+            ref={cursorRef}
+            className="inline-block align-text-bottom border-l-2 border-primary animate-pulse"
             style={{
               height: "1.2em",
-              animation: "blink 1s step-end infinite",
               marginRight: "1px",
             }}
           />
         );
       }
 
-      // Handle different character types
+      // Determine character styling
       let className = "text-muted-foreground";
       if (idx < typedText.length) {
-        className =
-          typedText[idx] === char
-            ? "text-primary"
-            : "text-red-400 bg-red-400/10 rounded-sm";
+        className = typedText[idx] === char
+          ? "text-primary"
+          : "text-red-400 bg-red-400/10 rounded-sm px-0.5";
       }
 
-      // Preserve all whitespace characters
+      // Handle special characters
       let displayChar: React.ReactNode = char;
       if (char === " ") {
         displayChar = "\u00A0"; // Non-breaking space
       } else if (char === "\t") {
-        displayChar = "\u00A0\u00A0"; // Tab as 2 non-breaking spaces
+        displayChar = "\u00A0\u00A0"; // Two spaces for tab
       } else if (char === "\n") {
-        // Handle newlines by adding a line break
         nodes.push(<br key={`br-${idx}`} />);
-        return; // Skip adding the span for newline
+        return;
       }
 
       nodes.push(
         <span
           key={idx}
           className={cn(
-            "font-mono tracking-wide transition-colors text-lg",
+            "font-mono tracking-wide transition-colors duration-150 text-lg",
             className
           )}
-          style={{ whiteSpace: "pre" }} // Preserve whitespace
         >
           {displayChar}
         </span>
       );
     });
 
-    // Add cursor at the end if we've reached the end
+    // Add cursor at end if we've reached the end
     if (currentIndex >= referenceText.length && !isCompleted) {
       nodes.push(
         <span
           key="cursor-end"
-          className="inline-block align-text-bottom border-l-2 border-primary"
+          ref={cursorRef}
+          className="inline-block align-text-bottom border-l-2 border-primary animate-pulse"
           style={{
             height: "1.2em",
-            animation: "blink 1s step-end infinite",
             marginRight: "1px",
           }}
         />
       );
     }
 
+    // Add completion indicator
     if (isCompleted) {
       nodes.push(
-        <span key="completed" className="ml-2 text-primary">
-          <CheckCircle className="inline-block w-4 h-4" />
+        <span key="completed" className="ml-2 text-green-500">
+          <CheckCircle className="inline-block w-5 h-5" />
         </span>
       );
     }
@@ -129,10 +160,8 @@ export function TypingTextArea({
             spellCheck={false}
             onChange={(e) => onReferenceTextChange(e.target.value)}
           />
-
-          <div className="flex flex-col sm:flex-row gap-3 mt-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
-              type="button"
               onClick={onStartTyping}
               disabled={!referenceText.trim()}
               className="flex items-center gap-2 flex-1 sm:flex-none bg-primary hover:bg-primary/90"
@@ -140,10 +169,8 @@ export function TypingTextArea({
               <Play className="w-4 h-4" />
               Start Typing
             </Button>
-
             {referenceText && (
               <Button
-                type="button"
                 variant="outline"
                 onClick={onClearText}
                 className="flex items-center gap-2 flex-1 sm:flex-none"
@@ -157,35 +184,38 @@ export function TypingTextArea({
       ) : (
         <>
           <div className="relative">
-            <ScrollArea
+            <div
+              ref={containerRef}
               className={cn(
-                // Base textarea styles from shadcn
-                "h-[400px] border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
-                // Typing-specific overrides
-                "font-mono resize-none select-none overflow-auto break-words leading-relaxed focus-within:border-primary/50"
+                "h-[400px] w-full rounded-md border border-input bg-transparent px-4 py-3",
+                "font-mono text-lg leading-relaxed overflow-auto",
+                "focus-within:border-primary/50 transition-colors",
               )}
               style={{
                 whiteSpace: "pre-wrap",
-                wordWrap: "break-word",
-                overflowWrap: "break-word",
+                wordBreak: "break-word",
+                scrollBehavior: "smooth",
+                scrollbarWidth: "none"
               }}
             >
               {renderWithCursor()}
-            </ScrollArea>
+            </div>
 
             {isCompleted && (
               <div className="absolute inset-0 bg-primary/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <div className="text-center p-6 bg-background/80 rounded-lg border shadow-lg">
-                  <CheckCircle className="w-12 h-12 text-primary mx-auto mb-3" />
+                <div className="text-center p-6 bg-background/90 rounded-lg border shadow-lg">
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">
-                    Congratulations!
+                    Excellent Work!
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     You completed the typing exercise
                   </p>
                   <div className="flex gap-2 justify-center">
-                    <Badge variant="secondary">{stats.wpm} WPM</Badge>
-                    <Badge variant="secondary">
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {stats.wpm} WPM
+                    </Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                       {stats.accuracy}% Accuracy
                     </Badge>
                   </div>
@@ -194,9 +224,8 @@ export function TypingTextArea({
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 mt-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
-              type="button"
               variant="outline"
               onClick={onResetTyping}
               className="flex items-center gap-2 flex-1 sm:flex-none"
@@ -204,10 +233,8 @@ export function TypingTextArea({
               <RotateCcw className="w-4 h-4" />
               Reset / Change Text
             </Button>
-
             {isCompleted && (
               <Button
-                type="button"
                 onClick={onTryAgain}
                 className="flex items-center gap-2 flex-1 sm:flex-none"
               >

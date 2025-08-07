@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import { ModeToggle } from "./mode-toggle";
 import { Keyboard, Code2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { usePracticeModeStore } from "@/lib/practice-store";
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
+  const { mode, setMode } = usePracticeModeStore();
 
   // avoid hydration mismatch
   useEffect(() => {
@@ -44,11 +47,17 @@ export function Header() {
 
         {/* Right Section - Controls */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Stats Badge - Only show on larger screens */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-full text-xs font-medium text-muted-foreground">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            Practice Mode
-          </div>
+          {/* Mode Selection - Only show on larger screens */}
+          <Select value={mode} onValueChange={(value) => setMode(value as 'practice' | 'algorithm')}>
+            <SelectTrigger className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-full text-xs font-medium text-muted-foreground">
+              <div className={`w-2 h-2 rounded-full animate-pulse ${mode === 'practice' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+              {mode === 'practice' ? 'Practice Mode' : 'Algorithm Mode'}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="practice">Practice Mode</SelectItem>
+              <SelectItem value="algorithm">Algorithm Mode</SelectItem>
+            </SelectContent>
+          </Select>
           
           <ModeToggle />
         </div>

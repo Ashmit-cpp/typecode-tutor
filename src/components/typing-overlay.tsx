@@ -9,6 +9,8 @@ import { Target, Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
 import { TypingStatsDisplay, ProgressCard } from "./typing-stats";
 import type { TypingStats } from "./typing-stats";
+import { usePracticeModeStore } from "@/lib/practice-store";
+import { getRandomAlgorithm } from "@/lib/algo-helper";
 
 type Mode = "input" | "typing";
 
@@ -19,6 +21,7 @@ export function TypingOverlay() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const { mode: practiceMode } = usePracticeModeStore();
 
   // Calculate typing statistics
   const stats = useMemo((): TypingStats => {
@@ -97,9 +100,14 @@ export function TypingOverlay() {
   }, [mode, isCompleted]);
 
   const pickRandom = () => {
-    const randomText =
-      SAMPLE_TEXTS[Math.floor(Math.random() * SAMPLE_TEXTS.length)];
-    setReferenceText(randomText);
+    if (practiceMode === 'algorithm') {
+      const algorithmText = getRandomAlgorithm();
+      setReferenceText(algorithmText);
+    } else {
+      const randomText =
+        SAMPLE_TEXTS[Math.floor(Math.random() * SAMPLE_TEXTS.length)];
+      setReferenceText(randomText);
+    }
   };
 
   const clearText = () => setReferenceText("");
@@ -140,12 +148,14 @@ export function TypingOverlay() {
                 <CardTitle className="flex flex-col items-start gap-0 text-lg sm:text-xl">
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-primary" />
-                    Setup Your Practice
+                    Setup Your {practiceMode === 'algorithm' ? 'Algorithm' : 'Practice'} Session
                   </div>
                   <div className="text-center">
                     <p className="text-muted-foreground text-sm sm:text-base">
-                      Enter your text or generate random content to start
-                      practicing
+                      {practiceMode === 'algorithm' 
+                        ? 'Generate algorithm code or enter your own to practice typing programming concepts'
+                        : 'Enter your text or generate random content to start practicing'
+                      }
                     </p>
                   </div>
                 </CardTitle>
@@ -159,7 +169,7 @@ export function TypingOverlay() {
                     className="w-full justify-start"
                   >
                     <Shuffle className="w-4 h-4 mr-2" />
-                    Generate Sample Text
+                    {practiceMode === 'algorithm' ? 'Generate Algorithm Code' : 'Generate Sample Text'}
                   </Button>
                 </div>
               </CardContent>

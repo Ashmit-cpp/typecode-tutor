@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { ModeToggle } from "./mode-toggle";
-import { Keyboard, Code2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { Keyboard, Code2, BarChart3, Home } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { usePracticeModeStore } from "@/lib/practice-store";
 
-export function Header() {
+type AppPage = 'practice' | 'statistics';
+
+interface HeaderProps {
+  currentPage: AppPage;
+  onPageChange: (page: AppPage) => void;
+}
+
+export function Header({ currentPage, onPageChange }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
   const { mode, setMode } = usePracticeModeStore();
 
@@ -47,17 +55,41 @@ export function Header() {
 
         {/* Right Section - Controls */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Mode Selection - Only show on larger screens */}
-          <Select value={mode} onValueChange={(value) => setMode(value as 'practice' | 'algorithm')}>
-            <SelectTrigger className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-full text-xs font-medium text-muted-foreground">
-              <div className={`w-2 h-2 rounded-full animate-pulse ${mode === 'practice' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-              {mode === 'practice' ? 'Practice Mode' : 'Algorithm Mode'}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="practice">Practice Mode</SelectItem>
-              <SelectItem value="algorithm">Algorithm Mode</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant={currentPage === 'practice' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onPageChange('practice')}
+              className="flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Practice</span>
+            </Button>
+            <Button
+              variant={currentPage === 'statistics' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onPageChange('statistics')}
+              className="flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Stats</span>
+            </Button>
+          </div>
+          
+          {/* Mode Selection - Only show on practice page and larger screens */}
+          {currentPage === 'practice' && (
+            <Select value={mode} onValueChange={(value) => setMode(value as 'practice' | 'algorithm')}>
+              <SelectTrigger className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-full text-xs font-medium text-muted-foreground">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${mode === 'practice' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                {mode === 'practice' ? 'Practice Mode' : 'Algorithm Mode'}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="practice">Practice Mode</SelectItem>
+                <SelectItem value="algorithm">Algorithm Mode</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           
           <ModeToggle />
         </div>

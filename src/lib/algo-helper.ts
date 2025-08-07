@@ -1,15 +1,26 @@
 import { algorithms } from './algo-text';
 
-export function getRandomAlgorithm(): string {
+export interface AlgorithmResult {
+  name: string;
+  code: string;
+}
+
+export function getRandomAlgorithm(): AlgorithmResult {
   const algorithmKeys = Object.keys(algorithms);
   const randomKey = algorithmKeys[Math.floor(Math.random() * algorithmKeys.length)] as keyof typeof algorithms;
-  return algorithms[randomKey];
+  return {
+    name: randomKey,
+    code: algorithms[randomKey]
+  };
 }
 
 export function getAllAlgorithmNames(): string[] {
   return Object.keys(algorithms);
 }
 
-export function getAlgorithmByName(name: string): string {
-  return algorithms[name as keyof typeof algorithms] || '';
+export function getAlgorithmByName(name: string): AlgorithmResult {
+  return {
+    name,
+    code: algorithms[name as keyof typeof algorithms] || ''
+  };
 } 

@@ -11,6 +11,7 @@ import { TypingStatsDisplay, ProgressCard } from "./typing-stats";
 import type { TypingStats } from "./typing-stats";
 import { usePracticeModeStore } from "@/lib/practice-store";
 import { getRandomAlgorithm } from "@/lib/algo-helper";
+import { useStatisticsStore } from "@/lib/statistics-store";
 
 type Mode = "input" | "typing";
 
@@ -21,7 +22,9 @@ export function TypingOverlay() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [currentAlgorithmName, setCurrentAlgorithmName] = useState<string | null>(null);
   const { mode: practiceMode } = usePracticeModeStore();
+  const { addTestResult } = useStatisticsStore();
 
   // Calculate typing statistics
   const stats = useMemo((): TypingStats => {
@@ -64,11 +67,26 @@ export function TypingOverlay() {
     if (
       currentIndex >= referenceText.length &&
       referenceText.length > 0 &&
-      mode === "typing"
+      mode === "typing" &&
+      !isCompleted
     ) {
       setIsCompleted(true);
+      
+      // Save test result to statistics
+      const textPreview = referenceText.slice(0, 50);
+      addTestResult({
+        mode: practiceMode,
+        wpm: stats.wpm,
+        accuracy: stats.accuracy,
+        timeElapsed: stats.timeElapsed,
+        correctChars: stats.correctChars,
+        totalChars: stats.totalChars,
+        errors: stats.errors,
+        textPreview,
+        algorithmName: practiceMode === 'algorithm' ? currentAlgorithmName || undefined : undefined,
+      });
     }
-  }, [currentIndex, referenceText.length, mode]);
+  }, [currentIndex, referenceText.length, mode, isCompleted, practiceMode, currentAlgorithmName, stats, addTestResult, referenceText]);
 
   useEffect(() => {
     if (mode !== "typing") return;
@@ -101,16 +119,21 @@ export function TypingOverlay() {
 
   const pickRandom = () => {
     if (practiceMode === 'algorithm') {
-      const algorithmText = getRandomAlgorithm();
-      setReferenceText(algorithmText);
+      const algorithmResult = getRandomAlgorithm();
+      setReferenceText(algorithmResult.code);
+      setCurrentAlgorithmName(algorithmResult.name);
     } else {
       const randomText =
         SAMPLE_TEXTS[Math.floor(Math.random() * SAMPLE_TEXTS.length)];
       setReferenceText(randomText);
+      setCurrentAlgorithmName(null);
     }
   };
 
-  const clearText = () => setReferenceText("");
+  const clearText = () => {
+    setReferenceText("");
+    setCurrentAlgorithmName(null);
+  };
 
   const resetTyping = () => {
     setMode("input");
@@ -118,6 +141,7 @@ export function TypingOverlay() {
     setCurrentIndex(0);
     setStartTime(null);
     setIsCompleted(false);
+    setCurrentAlgorithmName(null);
   };
 
   const startTyping = () => {

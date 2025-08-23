@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Play, RotateCcw, Trash2, CheckCircle } from "lucide-react";
-import type { TypingStats } from "./typing-stats";
 import { CardContent } from "./ui/card";
+import type { TypingStats } from "@/lib/stats-store";
 
 interface TypingTextAreaProps {
   mode: "input" | "typing";
@@ -42,24 +42,26 @@ export function TypingTextArea({
 
   // Simple auto-scroll to keep cursor centered
   useLayoutEffect(() => {
-    if (!containerRef.current || !cursorRef.current || mode !== "typing") return;
+    if (!containerRef.current || !cursorRef.current || mode !== "typing")
+      return;
 
     const container = containerRef.current;
     const cursor = cursorRef.current;
 
     // Get positions
-    const containerHeight = 400; // We know this is 400px
+    const containerHeight = 432; // We know this is 432px
     const containerCenter = containerHeight / 2; // 200px
-    
+
     const cursorRect = cursor.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
-    
+
     // Calculate cursor position relative to container
-    const cursorRelativeTop = cursorRect.top - containerRect.top + container.scrollTop;
-    
+    const cursorRelativeTop =
+      cursorRect.top - containerRect.top + container.scrollTop;
+
     // Calculate where cursor currently appears in the viewport
     const cursorViewportPosition = cursorRelativeTop - container.scrollTop;
-    
+
     // If cursor is not in the center zone (150px to 250px), scroll to center it
     if (cursorViewportPosition < 150 || cursorViewportPosition > 250) {
       const targetScrollTop = cursorRelativeTop - containerCenter;
@@ -91,9 +93,10 @@ export function TypingTextArea({
       // Determine character styling
       let className = "text-muted-foreground";
       if (idx < typedText.length) {
-        className = typedText[idx] === char
-          ? "text-primary"
-          : "text-red-400 bg-red-400/10 rounded-sm px-0.5";
+        className =
+          typedText[idx] === char
+            ? "text-primary"
+            : "text-red-400 bg-red-400/10 rounded-sm px-0.5";
       }
 
       // Handle special characters
@@ -153,7 +156,7 @@ export function TypingTextArea({
         <>
           <Textarea
             placeholder="Paste your text or code here to practice typing..."
-            className="font-mono resize-none h-[400px] tracking-wide text-lg"
+            className="font-mono resize-none h-[432px] tracking-wide text-lg"
             value={referenceText}
             style={{ scrollbarWidth: "none" }}
             spellCheck={false}
@@ -186,15 +189,15 @@ export function TypingTextArea({
             <div
               ref={containerRef}
               className={cn(
-                "h-[400px] w-full rounded-md border border-input bg-transparent px-4 py-3",
+                "h-[432px] w-full rounded-md border border-input bg-transparent px-4 py-3",
                 "font-mono text-lg leading-relaxed overflow-auto",
-                "focus-within:border-primary/50 transition-colors",
+                "focus-within:border-primary/50 transition-colors"
               )}
               style={{
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
                 scrollBehavior: "smooth",
-                scrollbarWidth: "none"
+                scrollbarWidth: "none",
               }}
             >
               {renderWithCursor()}
@@ -211,10 +214,16 @@ export function TypingTextArea({
                     You completed the typing exercise
                   </p>
                   <div className="flex gap-2 justify-center">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 text-green-800"
+                    >
                       {stats.wpm} WPM
                     </Badge>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-800"
+                    >
                       {stats.accuracy}% Accuracy
                     </Badge>
                   </div>

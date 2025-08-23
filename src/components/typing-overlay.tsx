@@ -7,24 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
 import { Target, Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
-import { TypingStatsDisplay, ProgressCard } from "./typing-stats";
-import type { TypingStats } from "./typing-stats";
+import { ProgressCard } from "./typing-stats";
 import { usePracticeModeStore } from "@/lib/practice-store";
 import { getRandomAlgorithm } from "@/lib/algo-helper";
 import { useStatisticsStore } from "@/lib/statistics-store";
-
-type Mode = "input" | "typing";
+import { useStatsStore } from "@/lib/stats-store";
+import type { TypingStats } from "@/lib/stats-store";
 
 export function TypingOverlay() {
-  const [mode, setMode] = useState<Mode>("input");
   const [referenceText, setReferenceText] = useState("");
   const [typedText, setTypedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentAlgorithmName, setCurrentAlgorithmName] = useState<string | null>(null);
-  const { mode: practiceMode } = usePracticeModeStore();
+  const { mode: practiceMode, typingMode, setTypingMode } = usePracticeModeStore();
   const { addTestResult } = useStatisticsStore();
+  const { setStats } = useStatsStore();
 
   // Calculate typing statistics
   const stats = useMemo((): TypingStats => {
@@ -54,20 +53,25 @@ export function TypingOverlay() {
   const progress =
     referenceText.length > 0 ? (currentIndex / referenceText.length) * 100 : 0;
 
+  // Update stats store whenever stats change
   useEffect(() => {
-    if (mode === "typing") {
+    setStats(stats);
+  }, [stats, setStats]);
+
+  useEffect(() => {
+    if (typingMode === "typing") {
       (document.activeElement as HTMLElement)?.blur();
       if (!startTime) {
         setStartTime(new Date());
       }
     }
-  }, [mode, startTime]);
+  }, [typingMode, startTime]);
 
   useEffect(() => {
     if (
       currentIndex >= referenceText.length &&
       referenceText.length > 0 &&
-      mode === "typing" &&
+      typingMode === "typing" &&
       !isCompleted
     ) {
       setIsCompleted(true);
@@ -86,10 +90,10 @@ export function TypingOverlay() {
         algorithmName: practiceMode === 'algorithm' ? currentAlgorithmName || undefined : undefined,
       });
     }
-  }, [currentIndex, referenceText.length, mode, isCompleted, practiceMode, currentAlgorithmName, stats, addTestResult, referenceText]);
+  }, [currentIndex, referenceText.length, typingMode, isCompleted, practiceMode, currentAlgorithmName, stats, addTestResult, referenceText]);
 
   useEffect(() => {
-    if (mode !== "typing") return;
+    if (typingMode !== "typing") return;
 
     const handleKey = (e: KeyboardEvent) => {
       e.preventDefault();
@@ -115,7 +119,7 @@ export function TypingOverlay() {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [mode, isCompleted]);
+  }, [typingMode, isCompleted]);
 
   const pickRandom = () => {
     if (practiceMode === 'algorithm') {
@@ -136,12 +140,13 @@ export function TypingOverlay() {
   };
 
   const resetTyping = () => {
-    setMode("input");
+    setTypingMode("input");
     setTypedText("");
     setCurrentIndex(0);
     setStartTime(null);
     setIsCompleted(false);
     setCurrentAlgorithmName(null);
+    setStats(null);
   };
 
   const startTyping = () => {
@@ -150,7 +155,7 @@ export function TypingOverlay() {
       setCurrentIndex(0);
       setStartTime(null);
       setIsCompleted(false);
-      setMode("typing");
+      setTypingMode("typing");
     }
   };
 
@@ -159,6 +164,8 @@ export function TypingOverlay() {
     setCurrentIndex(0);
     setStartTime(null);
     setIsCompleted(false);
+    setTypingMode("input");
+    setStats(null);
   };
 
   return (
@@ -166,7 +173,7 @@ export function TypingOverlay() {
       <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
         <Card className="" >
-          {mode === "input" ? (
+          {typingMode === "input" ? (
             <div className="flex flex-col lg:flex-row justify-between w-full items-center py-2">
               <CardHeader className="flex flex-row justify-between w-full">
                 <CardTitle className="flex flex-col items-start gap-0 text-lg sm:text-xl">
@@ -208,7 +215,7 @@ export function TypingOverlay() {
 
         {/* Text Area */}
         <TypingTextArea
-          mode={mode}
+          mode={typingMode}
           referenceText={referenceText}
           typedText={typedText}
           currentIndex={currentIndex}
@@ -222,15 +229,6 @@ export function TypingOverlay() {
         />
         </Card>
 
-        {/* Stats Display */}
-        <TypingStatsDisplay
-          stats={stats}
-          mode={mode}
-          progress={progress}
-          currentIndex={currentIndex}
-          totalChars={referenceText.length}
-          isCompleted={isCompleted}
-        />
       </div>
 
       <style>{`

@@ -1,8 +1,7 @@
 import { useState } from "react"
 import clsx from "clsx"
 import { motion, AnimatePresence } from "framer-motion"
-import type { Mode } from "@/lib/types"
-
+import type { Mode } from "./Features"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

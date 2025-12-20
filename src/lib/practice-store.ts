@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export type PracticeMode = 'practice' | 'algorithm';
 export type TypingMode = 'input' | 'typing';
@@ -9,18 +8,15 @@ interface PracticeModeState {
   setMode: (mode: PracticeMode) => void;
   typingMode: TypingMode;
   setTypingMode: (mode: TypingMode) => void;
+  isLoaded: boolean;
+  setIsLoaded: (loaded: boolean) => void;
 }
 
-export const usePracticeModeStore = create<PracticeModeState>()(
-  persist(
-    (set) => ({
-      mode: 'practice',
-      setMode: (mode) => set({ mode }),
-      typingMode: 'input',
-      setTypingMode: (typingMode) => set({ typingMode }),
-    }),
-    {
-      name: 'practice-mode-storage',
-    }
-  )
-); 
+export const usePracticeModeStore = create<PracticeModeState>((set) => ({
+  mode: 'practice',
+  setMode: (mode) => set({ mode }),
+  typingMode: 'input',
+  setTypingMode: (typingMode) => set({ typingMode }),
+  isLoaded: false,
+  setIsLoaded: (loaded) => set({ isLoaded: loaded }),
+})); 

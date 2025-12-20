@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Convex
+convex/_generated/
+convex/out/
+*.js.map
+# Ignore compiled JS files in convex directory (keep only .ts sources)
+convex/*.js
+!convex/_generated/*.js

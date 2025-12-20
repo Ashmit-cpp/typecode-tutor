@@ -4,6 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
 import { Target, Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
@@ -21,7 +22,7 @@ export function TypingOverlay() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentAlgorithmName, setCurrentAlgorithmName] = useState<string | null>(null);
-  const { mode: practiceMode, typingMode } = usePracticeModeStore();
+  const { mode: practiceMode, typingMode, setMode } = usePracticeModeStore();
   const addTestResult = useAddTestResult();
   const updateTypingMode = useUpdateTypingMode();
   const { setStats } = useStatsStore();
@@ -185,10 +186,20 @@ export function TypingOverlay() {
           {typingMode === "input" ? (
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               <CardHeader className="flex-1">
-                <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
-                  <Target className="w-6 h-6 text-primary" />
-                  Setup Your {practiceMode === 'algorithm' ? 'Algorithm' : 'Practice'} Session
-                </CardTitle>
+                <div>
+                  <CardTitle className="font-semibold text-xl text-secondary uppercase tracking-wide mb-2 block">
+                    Select Practice Mode
+                  </CardTitle>
+                  <Select value={practiceMode} onValueChange={(value: 'practice' | 'algorithm') => setMode(value)}>
+                    <SelectTrigger className="w-full max-w-xs">
+                      <SelectValue placeholder="Select practice mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="practice">Practice Text</SelectItem>
+                      <SelectItem value="algorithm">Algorithm Code</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <CardDescription className="text-sm sm:text-base mt-2">
                   {practiceMode === 'algorithm'
                     ? 'Generate algorithm code or enter your own to practice typing programming concepts'

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Terminal, Code2, BarChart3, Swords, Menu, Keyboard } from "lucide-react";
+import { Terminal, BarChart3, Swords, Menu, Keyboard } from "lucide-react";
 
 export function AppHeader() {
   const [mounted, setMounted] = useState(false);
@@ -28,7 +28,6 @@ export function AppHeader() {
 
   const navItems = [
     { to: "/practice", label: "Practice", icon: Keyboard },
-    { to: "/algorithm", label: "Algorithm", icon: Code2 },
     ...(isSignedIn ? [{ to: "/statistics", label: "Stats", icon: BarChart3 }] : []),
     { to: "/duels", label: "Duels", icon: Swords, badge: true },
 

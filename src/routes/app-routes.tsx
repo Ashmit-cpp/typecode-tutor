@@ -10,11 +10,6 @@ const LandingPage = lazy(() =>
 const PracticePage = lazy(() =>
   import("@/pages/practice-page").then((mod) => ({ default: mod.PracticePage }))
 );
-const AlgorithmPage = lazy(() =>
-  import("@/pages/algorithm-page").then((mod) => ({
-    default: mod.AlgorithmPage,
-  }))
-);
 const DuelsPage = lazy(() =>
   import("@/pages/keyclash-page").then((mod) => ({ default: mod.default }))
 );
@@ -52,16 +47,6 @@ export function AppRoutes() {
           <Suspense fallback={<LoadingState label="Loading practice..." />}>
             <PracticeLayout>
               <PracticePage />
-            </PracticeLayout>
-          </Suspense>
-        }
-      />
-      <Route
-        path="/algorithm"
-        element={
-          <Suspense fallback={<LoadingState label="Loading algorithms..." />}>
-            <PracticeLayout>
-              <AlgorithmPage />
             </PracticeLayout>
           </Suspense>
         }

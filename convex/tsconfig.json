@@ -7,8 +7,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": [
-    "src/**/*",
-    "convex/**/*"
-  ]
+  "include": ["*.ts", "_generated/**/*"]
 }
+

@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
-import { Target, Shuffle } from "lucide-react";
+import { Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
 import { ProgressCard } from "./typing-stats";
 import { usePracticeModeStore } from "@/lib/practice-store";

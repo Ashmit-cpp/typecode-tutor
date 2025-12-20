@@ -95,8 +95,8 @@ export function TypingTextArea({
       if (idx < typedText.length) {
         className =
           typedText[idx] === char
-            ? "text-primary"
-            : "text-red-400 bg-red-400/10 rounded-sm px-0.5";
+            ? "text-secondary"
+            : "text-red-400 bg-red-400/10 rounded-sm px-0.1";
       }
 
       // Handle special characters

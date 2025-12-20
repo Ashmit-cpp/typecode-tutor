@@ -3,16 +3,17 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
 import { Target, Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
 import { ProgressCard } from "./typing-stats";
 import { usePracticeModeStore } from "@/lib/practice-store";
 import { getRandomAlgorithm } from "@/lib/algo-helper";
-import { useStatisticsStore } from "@/lib/statistics-store";
 import { useStatsStore } from "@/lib/stats-store";
 import type { TypingStats } from "@/lib/stats-store";
+import { useAddTestResult, useUpdateTypingMode } from "@/lib/convex-hooks";
 
 export function TypingOverlay() {
   const [referenceText, setReferenceText] = useState("");
@@ -21,8 +22,9 @@ export function TypingOverlay() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentAlgorithmName, setCurrentAlgorithmName] = useState<string | null>(null);
-  const { mode: practiceMode, typingMode, setTypingMode } = usePracticeModeStore();
-  const { addTestResult } = useStatisticsStore();
+  const { mode: practiceMode, typingMode, setMode } = usePracticeModeStore();
+  const addTestResult = useAddTestResult();
+  const updateTypingMode = useUpdateTypingMode();
   const { setStats } = useStatsStore();
 
   // Calculate typing statistics
@@ -76,7 +78,7 @@ export function TypingOverlay() {
     ) {
       setIsCompleted(true);
       
-      // Save test result to statistics
+      // Save test result to Convex
       const textPreview = referenceText.slice(0, 50);
       addTestResult({
         mode: practiceMode,
@@ -88,6 +90,8 @@ export function TypingOverlay() {
         errors: stats.errors,
         textPreview,
         algorithmName: practiceMode === 'algorithm' ? currentAlgorithmName || undefined : undefined,
+      }).catch((error) => {
+        console.error("Failed to save test result:", error);
       });
     }
   }, [currentIndex, referenceText.length, typingMode, isCompleted, practiceMode, currentAlgorithmName, stats, addTestResult, referenceText]);
@@ -140,7 +144,9 @@ export function TypingOverlay() {
   };
 
   const resetTyping = () => {
-    setTypingMode("input");
+    updateTypingMode("input").catch((error) => {
+      console.error("Failed to update typing mode:", error);
+    });
     setTypedText("");
     setCurrentIndex(0);
     setStartTime(null);
@@ -155,7 +161,9 @@ export function TypingOverlay() {
       setCurrentIndex(0);
       setStartTime(null);
       setIsCompleted(false);
-      setTypingMode("typing");
+      updateTypingMode("typing").catch((error) => {
+        console.error("Failed to update typing mode:", error);
+      });
     }
   };
 
@@ -164,7 +172,9 @@ export function TypingOverlay() {
     setCurrentIndex(0);
     setStartTime(null);
     setIsCompleted(false);
-    setTypingMode("input");
+    updateTypingMode("input").catch((error) => {
+      console.error("Failed to update typing mode:", error);
+    });
     setStats(null);
   };
 
@@ -172,28 +182,36 @@ export function TypingOverlay() {
     <div className="p-4 sm:p-6 lg:p-8 h-full">
       <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
-        <Card className="" >
+        <Card className="bg-transparent backdrop-blur-sm">
           {typingMode === "input" ? (
-            <div className="flex flex-col lg:flex-row justify-between w-full items-center py-2">
-              <CardHeader className="flex flex-row justify-between w-full">
-                <CardTitle className="flex flex-col items-start gap-0 text-lg sm:text-xl">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    Setup Your {practiceMode === 'algorithm' ? 'Algorithm' : 'Practice'} Session
-                  </div>
-                  <div className="text-center">
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                      {practiceMode === 'algorithm' 
-                        ? 'Generate algorithm code or enter your own to practice typing programming concepts'
-                        : 'Enter your text or generate random content to start practicing'
-                      }
-                    </p>
-                  </div>
-                </CardTitle>
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+              <CardHeader className="flex-1">
+                <div>
+                  <CardTitle className="font-semibold text-xl text-secondary uppercase tracking-wide mb-2 block">
+                    Select Practice Mode
+                  </CardTitle>
+                  <Select value={practiceMode} onValueChange={(value: 'practice' | 'algorithm') => setMode(value)}>
+                    <SelectTrigger className="w-full max-w-xs">
+                      <SelectValue placeholder="Select practice mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="practice">Practice Text</SelectItem>
+                      <SelectItem value="algorithm">Algorithm Code</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <CardDescription className="text-sm sm:text-base mt-2">
+                  {practiceMode === 'algorithm'
+                    ? 'Generate algorithm code or enter your own to practice typing programming concepts'
+                    : 'Enter your text or generate random content to start practicing'
+                  }
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <h3 className="text-md font-semibold mb-1">Quick Start</h3>
-                <div className="space-y-1">
+              <CardContent className="lg:self-center">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  Quick Start
+                </h3>
+                <div className="space-y-2">
                   <Button
                     size="sm"
                     onClick={pickRandom}

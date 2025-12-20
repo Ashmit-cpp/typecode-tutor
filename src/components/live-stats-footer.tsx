@@ -21,8 +21,8 @@ export function LiveStatsFooter({ stats, show = true }: LiveStatsFooterProps) {
 
   return (
     <footer className="h-16 sticky bottom-0 z-50 w-full border-t bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 py-3">
-        <div className="flex gap-4">
+      <div className="container mx-auto px-4 sm:px-6 h-full">
+        <div className="flex gap-4 items-center justify-center h-full">
 
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
@@ -40,7 +40,6 @@ export function LiveStatsFooter({ stats, show = true }: LiveStatsFooterProps) {
               {stats.accuracy}%
             </div>
           </div>
-
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
               <Timer className="w-4 h-4 text-primary" />
@@ -50,7 +49,6 @@ export function LiveStatsFooter({ stats, show = true }: LiveStatsFooterProps) {
               {Math.floor(stats.timeElapsed)}s
             </div>
           </div>
-
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
               <XCircle className="w-4 h-4 text-destructive" />

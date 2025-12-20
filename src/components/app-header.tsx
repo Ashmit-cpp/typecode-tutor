@@ -43,9 +43,9 @@ export function AppHeader() {
   }) => (
     <Link to={to}>
       <Button
-        variant={isActive(to) ? "default" : "ghost"}
+        variant={"link"}
         size="sm"
-        className={`gap-2 ${className}`}
+        className={`gap-2 ${className} ${isActive(to) ? "text-primary" : "text-foreground"}`}
       >
         <Icon className="w-4 h-4" />
         <span>{label}</span>

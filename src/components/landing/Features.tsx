@@ -79,7 +79,7 @@ const Features: React.FC = () => {
   return (
     <section
       id="features"
-      className="py-24 px-6"
+      className="py-24 px-6 mb-16"
     >
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">

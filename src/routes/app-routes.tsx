@@ -26,60 +26,54 @@ const StatisticsPage = lazy(() =>
 
 export function AppRoutes() {
   return (
-    <Suspense
-      fallback={
-        <LoadingState label="Loading app..." className="py-10" />
-      }
-    >
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Suspense fallback={<LoadingState label="Loading home..." />}>
-              <MainLayout>
-                <LandingPage />
-              </MainLayout>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/duels"
-          element={
-            <Suspense fallback={<LoadingState label="Loading duels..." />}>
-              <MainLayout>
-                <DuelsPage onEnterQueue={() => {}} />
-              </MainLayout>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/practice"
-          element={
-            <Suspense fallback={<LoadingState label="Loading practice..." />}>
-              <PracticeLayout>
-                <PracticePage />
-              </PracticeLayout>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/algorithm"
-          element={
-            <Suspense fallback={<LoadingState label="Loading algorithms..." />}>
-              <PracticeLayout>
-                <AlgorithmPage />
-              </PracticeLayout>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/statistics"
-          element={
-            <Suspense fallback={<LoadingState label="Loading statistics..." />}>
-              <PracticeLayout>
-                <StatisticsPage />
-              </PracticeLayout>
-            </Suspense>
+    <Suspense fallback={<div className="bg-background text-foreground"></div>}>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <MainLayout>
+            <LandingPage />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/duels"
+        element={
+          <Suspense fallback={<LoadingState label="Loading duels..." />}>
+            <MainLayout>
+              <DuelsPage onEnterQueue={() => {}} />
+            </MainLayout>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/practice"
+        element={
+          <Suspense fallback={<LoadingState label="Loading practice..." />}>
+            <PracticeLayout>
+              <PracticePage />
+            </PracticeLayout>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/algorithm"
+        element={
+          <Suspense fallback={<LoadingState label="Loading algorithms..." />}>
+            <PracticeLayout>
+              <AlgorithmPage />
+            </PracticeLayout>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/statistics"
+        element={
+          <Suspense fallback={<LoadingState label="Loading statistics..." />}>
+            <PracticeLayout>
+              <StatisticsPage />
+            </PracticeLayout>
+          </Suspense>
           }
         />
       </Routes>

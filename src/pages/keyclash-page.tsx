@@ -163,7 +163,7 @@ const DuelsLanding: React.FC<DuelsLandingProps> = ({ onEnterQueue }) => {
       </section>
 
       {/* Fairness & Stats */}
-      <section className="max-w-4xl mx-auto bg-background/70 border border-border overflow-hidden mb-24">
+      {/* <section className="max-w-4xl mx-auto bg-background/70 border border-border overflow-hidden mb-24">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="p-10 flex flex-col justify-center">
             <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
@@ -214,15 +214,7 @@ const DuelsLanding: React.FC<DuelsLandingProps> = ({ onEnterQueue }) => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Ready to prove your syntax?</h2>
-        <Button variant="link" onClick={onEnterQueue} className="font-mono text-sm text-primary">
-          FIND_OPPONENT -&gt;
-        </Button>
-      </div>
+      </section> */}
     </div>
   )
 }

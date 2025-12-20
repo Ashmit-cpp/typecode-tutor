@@ -15,7 +15,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary">
       {/* Global Squares Background */}
       <Squares
-        speed={0.5}
+        speed={0.4}
         squareSize={40}
         direction="down" // up, down, left, right, diagonal
         borderColor={theme.theme === "dark" ? "#201C2E" : "#E0DDDC"}

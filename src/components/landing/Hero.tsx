@@ -60,15 +60,21 @@ const Hero: React.FC = () => {
         </motion.div>
 
         {/* Heading */}
-        <h1 className="text-5xl sm:text-7xl font-mono font-bold -tracking-tighter text-foreground mb-6 min-h-[1.1em]">
-          <TextType
-            text={["Code at the speed of thought"]}
-            typingSpeed={75}
-            pauseDuration={1500}
-            loop={false}
-            showCursor={true}
-            cursorCharacter="_"
-          />
+        <h1 className="relative text-5xl sm:text-7xl font-mono font-bold -tracking-tighter text-foreground mb-6">
+          {/* Invisible placeholder */}
+          <span className="invisible block">Code at the speed of thought</span>
+
+          {/* Animated text */}
+          <span className="absolute inset-0">
+            <TextType
+              text={["Code at the speed of thought"]}
+              typingSpeed={75}
+              pauseDuration={1500}
+              loop={false}
+              showCursor={true}
+              cursorCharacter="_"
+            />
+          </span>
         </h1>
 
         {/* Subheading */}

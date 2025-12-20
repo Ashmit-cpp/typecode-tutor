@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-muted-foreground">
             <div className="font-mono">
-              © 2025 KeyClash. Open source typing tutor.
+              © 2025 KeyClash. The fastest way to type.
             </div>
           </div>
 

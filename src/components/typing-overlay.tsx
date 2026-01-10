@@ -182,7 +182,7 @@ export function TypingOverlay() {
     <div className="p-4 sm:p-6 lg:p-8 h-full">
       <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
-        <Card className="bg-transparent backdrop-blur-sm">
+        <Card className="bg-background">
           {typingMode === "input" ? (
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               <CardHeader className="flex-1">

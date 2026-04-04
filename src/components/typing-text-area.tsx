@@ -151,7 +151,7 @@ export function TypingTextArea({
   };
 
   return (
-    <CardContent className="px-4 sm:px-6 flex flex-col gap-4">
+    <CardContent className="p-4 sm:px-6 flex flex-col gap-4">
       {mode === "input" ? (
         <>
           <Textarea

@@ -5,6 +5,8 @@ import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { glass, glassCardClassName, glassPrimaryButton } from "@/lib/glass-styles";
+import { cn } from "@/lib/utils";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
 import { Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
@@ -182,19 +184,23 @@ export function TypingOverlay() {
     <div className="p-4 sm:p-6 lg:p-8 h-full">
       <div className="max-w-9/12 mx-auto space-y-6">
         {/* Header Card */}
-        <Card className="bg-background">
+        <Card className={glassCardClassName() }>
           {typingMode === "input" ? (
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               <CardHeader className="flex-1">
                 <div>
-                  <CardTitle className="font-semibold text-xl text-secondary uppercase tracking-wide mb-2 block">
+                  <CardTitle className="font-semibold text-xl text-secondary uppercase tracking-wide my-3 block">
                     Select Practice Mode
                   </CardTitle>
                   <Select value={practiceMode} onValueChange={(value: 'practice' | 'algorithm') => setMode(value)}>
-                    <SelectTrigger className="w-full max-w-xs">
+                    <SelectTrigger
+                      className={cn("w-full max-w-xs", glass.panelSubtle)}
+                    >
                       <SelectValue placeholder="Select practice mode" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent
+                      className={cn("rounded-[var(--radius)] border-0 shadow-none", glass.popover)}
+                    >
                       <SelectItem value="practice">Practice Text</SelectItem>
                       <SelectItem value="algorithm">Algorithm Code</SelectItem>
                     </SelectContent>
@@ -215,7 +221,10 @@ export function TypingOverlay() {
                   <Button
                     size="sm"
                     onClick={pickRandom}
-                    className="w-full justify-start"
+                    className={cn(
+                      "w-full justify-start rounded-[var(--radius)]",
+                      glassPrimaryButton,
+                    )}
                   >
                     <Shuffle className="w-4 h-4 mr-2" />
                     {practiceMode === 'algorithm' ? 'Generate Algorithm Code' : 'Generate Sample Text'}

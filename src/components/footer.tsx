@@ -1,50 +1,52 @@
+import { getLeaderboardPathname, scrollToLeaderboard } from "@/lib/leaderboard-nav";
+import { glass } from "@/lib/glass-styles";
+import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 
-import { Github, Twitter, MessageCircle } from "lucide-react"
-
-const Footer: React.FC = () => {
-  return (
-    <footer className="pt-8 pb-6 px-6 border-t border-border/50 bg-background/50 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-muted-foreground">
-            <div className="font-mono">
-              © 2025 KeyClash. The fastest way to type.
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-md hover:bg-muted/50 transition-colors group"
-              aria-label="GitHub"
-            >
-              <Github className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-md hover:bg-muted/50 transition-colors group"
-              aria-label="Twitter"
-            >
-              <Twitter className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </a>
-            <a
-              href="https://discord.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-md hover:bg-muted/50 transition-colors group"
-              aria-label="Discord"
-            >
-              <MessageCircle className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  )
+function Wrap({ children }: { children: React.ReactNode }) {
+  return <div className="container mx-auto px-4 sm:px-6">{children}</div>;
 }
 
-export default Footer
+export function Footer() {
+  const location = useLocation();
+  const leaderboardBase = getLeaderboardPathname(location.pathname);
+
+  return (
+    <footer className={cn("w-full py-6", glass.footer)}>
+      <Wrap>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[13px] font-bold text-primary tracking-tight">KeyClash</span>
+            <span className="font-mono text-[9px] text-muted-foreground tracking-[0.15em]">· The faster compiler wins.</span>
+          </div>
+
+          <div className="flex gap-6">
+            <Link
+              to="/practice"
+              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+            >
+              Practice
+            </Link>
+            <Link
+              to={{ pathname: leaderboardBase, hash: "leaderboard" }}
+              onClick={(e) => {
+                if (location.pathname === "/" || location.pathname === "/duels") {
+                  e.preventDefault();
+                  scrollToLeaderboard(location.pathname);
+                }
+              }}
+              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+            >
+              Leaderboard
+            </Link>
+          </div>
+
+          <p className="font-mono text-[9px] text-muted-foreground tracking-[0.12em]">
+            <span className="text-primary">■</span> you &nbsp;
+            <span className="text-secondary">■</span> opponent
+          </p>
+        </div>
+      </Wrap>
+    </footer>
+  );
+} 

@@ -38,7 +38,7 @@ function Wrap({
   return (
     <div
       className={cn(
-        "mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12",
+        "mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-12",
         className,
       )}
     >
@@ -57,7 +57,7 @@ function SectionLabel({
   return (
     <p
       className={cn(
-        "font-mono text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/85 mb-4",
+        "font-mono text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/85 mb-3 sm:mb-4",
         className,
       )}
     >
@@ -152,11 +152,16 @@ function TerminalPreview() {
   );
 
   return (
-    <div className={cn("w-full max-w-[540px] overflow-hidden", glass.panel)}>
+    <div
+      className={cn(
+        "w-full min-w-0 max-w-[min(100%,540px)] overflow-hidden",
+        glass.panel,
+      )}
+    >
       {/* Title bar */}
       <div
         className={cn(
-          "flex items-center gap-2 border-b px-4 py-2.5",
+          "flex items-center gap-2 border-b px-3 py-2.5 sm:px-4",
           glass.divider,
           "bg-white/[0.03] backdrop-blur-md",
         )}
@@ -176,7 +181,7 @@ function TerminalPreview() {
       {/* Code */}
       <div
         className={cn(
-          "border-b px-5 py-5 font-mono text-[13px] leading-[1.75] whitespace-pre overflow-x-auto backdrop-blur-sm sm:text-sm",
+          "border-b px-4 py-4 font-mono text-[12px] leading-[1.75] whitespace-pre overflow-x-auto backdrop-blur-sm sm:px-5 sm:py-5 sm:text-sm",
           glass.divider,
         )}
         style={{
@@ -191,7 +196,7 @@ function TerminalPreview() {
       </div>
 
       {/* Players */}
-      <div className="space-y-5 bg-gradient-to-b from-card/15 to-card/5 p-5 text-base backdrop-blur-md">
+      <div className="space-y-4 bg-gradient-to-b from-card/15 to-card/5 p-4 text-base backdrop-blur-md sm:space-y-5 sm:p-5">
         {[
           {
             label: "you",
@@ -260,14 +265,15 @@ function KeyClashLandingHeroContent({
   return (
     <div className="relative flex min-h-0 w-full flex-1 flex-col justify-center">
       <Wrap className={cn("relative z-10", wrapClassName)}>
-        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-x-16">
+        <div className="grid grid-cols-1 items-center gap-8 sm:gap-10 md:gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-x-14 xl:gap-x-16">
           {/* Left — text content */}
           <motion.div
             variants={staggerContainer(0.1, 0.1)}
             initial="hidden"
             animate="visible"
+            className="min-w-0"
           >
-            <motion.div className="mb-7" variants={fadeUp} transition={{ duration: 0.5, ease: "easeOut" }}>
+            <motion.div className="mb-5 sm:mb-7" variants={fadeUp} transition={{ duration: 0.5, ease: "easeOut" }}>
               <LiveTag>Season 1 · Now open</LiveTag>
             </motion.div>
 
@@ -275,7 +281,9 @@ function KeyClashLandingHeroContent({
               variants={fadeUp}
               transition={{ duration: 0.55, ease: "easeOut" }}
               className="font-sans font-bold tracking-tight text-foreground leading-[0.96]"
-              style={{ fontSize: "clamp(52px,8.5vw,92px)" }}
+              style={{
+                fontSize: "clamp(2.25rem, 9.5vw + 0.35rem, 5.75rem)",
+              }}
             >
               Key<span className="text-primary">Clash</span>
             </motion.h1>
@@ -283,7 +291,7 @@ function KeyClashLandingHeroContent({
             <motion.p
               variants={fadeUp}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="font-mono text-muted-foreground leading-relaxed mt-6 text-[clamp(15px,1.75vw,18px)] max-w-[26rem]"
+              className="font-mono text-muted-foreground leading-relaxed mt-4 sm:mt-6 text-[clamp(15px,1.75vw,18px)] max-w-[26rem]"
             >
               Real-time 1v1 typing battles on identical code snippets.{" "}
               <span className="text-foreground">The faster compiler wins.</span>
@@ -292,7 +300,7 @@ function KeyClashLandingHeroContent({
             <motion.div
               variants={fadeUp}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="flex flex-wrap items-center gap-3 mt-10"
+              className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3"
             >
               <motion.button
                 onClick={onFindMatch}
@@ -300,7 +308,7 @@ function KeyClashLandingHeroContent({
                 whileTap={shouldReduceMotion ? {} : { y: 0 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "inline-flex cursor-pointer items-center rounded-[var(--radius)] px-7 py-3.5 font-mono text-base font-bold uppercase tracking-[0.1em] text-primary-foreground transition-colors duration-200",
+                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 font-mono text-base font-bold uppercase tracking-[0.1em] text-primary-foreground transition-colors duration-200 sm:w-auto",
                   "border border-white/15 bg-primary/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_8px_32px_-4px_oklch(0.80_0.124_305_/_0.35)] backdrop-blur-md",
                 )}
               >
@@ -309,7 +317,7 @@ function KeyClashLandingHeroContent({
               <button
                 onClick={onPracticeSolo}
                 className={cn(
-                  "inline-flex cursor-pointer items-center rounded-[var(--radius)] border px-7 py-3.5 font-mono text-base uppercase tracking-[0.1em] text-muted-foreground transition-all duration-200",
+                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 font-mono text-base uppercase tracking-[0.1em] text-muted-foreground transition-all duration-200 sm:w-auto",
                   "border-white/[0.12] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl",
                   "hover:border-primary/35 hover:bg-primary/[0.08] hover:text-foreground",
                 )}
@@ -322,7 +330,7 @@ function KeyClashLandingHeroContent({
               variants={fadeIn}
               transition={{ duration: 0.6, ease: "easeOut" }}
               className={cn(
-                "mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t pt-8",
+                "mt-8 flex flex-wrap gap-x-8 gap-y-5 border-t pt-6 sm:mt-10 sm:gap-x-10 sm:gap-y-4 sm:pt-8",
                 glass.divider,
               )}
             >
@@ -349,7 +357,7 @@ function KeyClashLandingHeroContent({
 
           {/* Right — terminal preview */}
           <motion.div
-            className="flex justify-center lg:justify-end"
+            className="flex w-full min-w-0 justify-center lg:justify-end"
             initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.65, ease: "easeOut", delay: 0.25 }}
@@ -395,11 +403,11 @@ export function KeyClashLandingSectionsGrid({
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section className="mx-auto w-full max-w-7xl">
+    <section className="mx-auto w-full min-w-0 max-w-7xl overflow-x-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr]">
         <div
           className={cn(
-            "col-span-full relative flex min-h-0 w-full flex-col overflow-hidden px-4 sm:px-5 md:px-6 lg:px-8",
+            "col-span-full relative flex min-h-0 w-full min-w-0 flex-col overflow-hidden px-4 pt-4 pb-6 sm:px-5 sm:pt-6 sm:pb-8 md:px-6 lg:px-8",
             HERO_VIEWPORT_MIN_H,
           )}
         >
@@ -411,7 +419,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (1) Steps ── */}
-        <div className="px-4 sm:px-5 md:px-6 lg:px-8 py-12 sm:py-16 md:py-[clamp(64px,10vw,120px)]">
+        <div className="px-4 py-10 sm:px-5 sm:py-14 md:px-6 lg:px-8 md:py-[clamp(64px,10vw,120px)]">
           <Wrap className="!px-0">
             <motion.div
               initial="hidden"
@@ -460,7 +468,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (2) CTA ── */}
-        <div className="relative flex items-center justify-center overflow-hidden px-4 py-10 sm:px-5 sm:py-14 md:px-6 md:py-[clamp(48px,8vw,80px)] lg:px-8">
+        <div className="relative flex min-w-0 items-center justify-center overflow-hidden px-4 py-10 sm:px-5 sm:py-14 md:px-6 md:py-[clamp(48px,8vw,80px)] lg:px-8">
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -534,7 +542,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (3) Features ── */}
-        <div className="px-4 sm:px-5 md:px-6 lg:px-8 py-12 sm:py-16 md:py-[clamp(64px,10vw,120px)]">
+        <div className="px-4 py-10 sm:px-5 sm:py-14 md:px-6 lg:px-8 md:py-[clamp(64px,10vw,120px)]">
           <Wrap className="!px-0">
             <motion.div
               initial="hidden"
@@ -588,7 +596,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (4) Leaderboard ── */}
-        <div className="relative flex flex-col justify-center px-4 sm:px-5 md:px-6 lg:px-8 py-12 sm:py-16 md:py-[clamp(64px,10vw,120px)]">
+        <div className="relative flex min-w-0 flex-col justify-center px-4 py-10 sm:px-5 sm:py-14 md:px-6 lg:px-8 md:py-[clamp(64px,10vw,120px)]">
           <div
             className="pointer-events-none absolute inset-0"
             style={{

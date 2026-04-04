@@ -1,7 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// Helper for initial player state to avoid repetition
+// Fallback snippets if the database 'texts' table is empty
+const CODE_SNIPPETS = [
+  "const result = await ctx.db.query('users').collect();",
+  "export default function App() { return <div>Hello World</div>; }",
+  "const [count, setCount] = useState(0);",
+  "interface User { id: string; name: string; email: string; }",
+  "useEffect(() => { console.log('Component mounted'); }, []);"
+];
+
 const initialPlayerState = (userId: string, userName: string) => ({
   id: userId,
   name: userName,
@@ -18,20 +26,17 @@ export const findOrCreateGame = mutation({
     userName: v.string(),
   },
   handler: async (ctx, args) => {
-    // 1. SEARCH: Is there an open game waiting for a player?
+    // 1. SEARCH: Look for a waiting game
     const existingGame = await ctx.db
       .query("games")
       .withIndex("by_status", (q) => q.eq("status", "waiting"))
       .first();
 
-    // 2. JOIN: If we found a game, join it!
     if (existingGame) {
-      // Edge Case: Prevent joining your own game if you clicked twice
       if (existingGame.player1.id === args.userId) {
         return { gameId: existingGame._id, status: "waiting" };
       }
 
-      // Atomic Update: Add player 2 and start the game immediately
       await ctx.db.patch(existingGame._id, {
         player2: initialPlayerState(args.userId, args.userName),
         status: "active",
@@ -41,28 +46,29 @@ export const findOrCreateGame = mutation({
       return { gameId: existingGame._id, status: "active" };
     }
 
-    // 3. CREATE: No games found? Create a new one.
+    // 2. CREATE: Fetch code snippets from the DB
+    const texts = await ctx.db.query("texts").collect();
     
-    // Fetch a random text (assuming you have a 'texts' table, or use a fallback)
-    const texts = await ctx.db.query("texts").collect(); // Ideally limit this query
-    const randomTextRecord = texts.length > 0 
-      ? texts[Math.floor(Math.random() * texts.length)]
-      : null;
-      
-    const textToType = randomTextRecord?.content ?? "The quick brown fox jumps over the lazy dog.";
+    let textToType: string;
+
+    if (texts.length > 0) {
+      // Pick a random snippet from your database
+      textToType = texts[Math.floor(Math.random() * texts.length)].content;
+    } else {
+      // Pick a random hardcoded code snippet
+      textToType = CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)];
+    }
 
     const gameId = await ctx.db.insert("games", {
       status: "waiting",
       text: textToType,
       player1: initialPlayerState(args.userId, args.userName),
-      // player2 is undefined until someone joins
     });
 
     return { gameId, status: "waiting" };
   },
 });
 
-// Use this query on the game page to listen for the opponent joining
 export const getGame = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
@@ -70,16 +76,11 @@ export const getGame = query({
   },
 });
 
-// Call this if the user hits "Cancel" while waiting
 export const leaveGame = mutation({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
     const game = await ctx.db.get(args.gameId);
-    
-    // Only delete if it's still waiting. 
-    // If it's active, leaving counts as a forfeit (logic for another day)
-    if (game && game.status === "waiting") {
-      await ctx.db.delete(args.gameId);
-    }
+    if (!game || game.status !== "waiting") return;
+    await ctx.db.delete(args.gameId);
   },
 });

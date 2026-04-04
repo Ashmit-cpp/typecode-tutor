@@ -13,6 +13,12 @@ import {
   useSurrender,
   useLeaveGame,
 } from "@/lib/game-hooks";
+import {
+  glassCardClassName,
+  glassGhostButton,
+  glassPrimaryButton,
+} from "@/lib/glass-styles";
+import { cn } from "@/lib/utils";
 
 interface TypingStats {
   wpm: number;
@@ -25,7 +31,8 @@ export function GamePage() {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const { user } = useUser();
-  const game = useGame(gameId as Id<"games">);
+  const gameConvexId = gameId ? (gameId as Id<"games">) : undefined;
+  const game = useGame(gameConvexId);
   const updateProgress = useUpdateGameProgress();
   const leaveGame = useLeaveGame();
   const surrender = useSurrender();
@@ -71,33 +78,36 @@ export function GamePage() {
   // Send progress updates to backend
   useEffect(() => {
     if (
-      game?.status === "active" &&
-      user &&
-      (isPlayer1 || isPlayer2) &&
-      startTime
+      !gameConvexId ||
+      game?.status !== "active" ||
+      !user ||
+      !(isPlayer1 || isPlayer2) ||
+      !startTime
     ) {
-      const interval = setInterval(() => {
-        updateProgress({
-          gameId: gameId as Id<"games">,
-          userId: user.id,
-          currentPosition: currentIndex,
-          wpm: stats.wpm,
-          accuracy: stats.accuracy,
-          errorCount: stats.errorCount,
-          completed: isCompleted,
-        }).catch((error) => {
-          console.error("Failed to update progress:", error);
-        });
-      }, 500); // Update every 500ms
-
-      return () => clearInterval(interval);
+      return;
     }
+
+    const interval = setInterval(() => {
+      updateProgress({
+        gameId: gameConvexId,
+        userId: user.id,
+        currentPosition: currentIndex,
+        wpm: stats.wpm,
+        accuracy: stats.accuracy,
+        errorCount: stats.errorCount,
+        completed: isCompleted,
+      }).catch((error) => {
+        console.error("Failed to update progress:", error);
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
   }, [
+    gameConvexId,
     game?.status,
     user,
     isPlayer1,
     isPlayer2,
-    gameId,
     currentIndex,
     stats,
     isCompleted,
@@ -151,9 +161,9 @@ export function GamePage() {
   }, [currentIndex, referenceText.length, game?.status, isCompleted]);
 
   async function handleLeaveGame() {
-    if (!gameId) return;
+    if (!gameConvexId) return;
     try {
-      await leaveGame({ gameId: gameId as Id<"games"> });
+      await leaveGame({ gameId: gameConvexId });
       navigate("/duels");
     } catch (error) {
       console.error("Failed to leave game:", error);
@@ -161,21 +171,44 @@ export function GamePage() {
   }
 
   async function handleSurrender() {
-    if (!gameId || !user) return;
+    if (!gameConvexId || !user) return;
     try {
-      await surrender({ gameId: gameId as Id<"games">, userId: user.id });
+      await surrender({ gameId: gameConvexId, userId: user.id });
       navigate("/duels");
     } catch (error) {
       console.error("Failed to surrender:", error);
     }
   }
 
+  if (!gameId) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center px-4 py-6 sm:p-6">
+        <Card className={glassCardClassName("w-full max-w-md")}>
+          <CardHeader>
+            <CardTitle>Invalid game link</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              This URL does not include a valid game id.
+            </p>
+            <Button
+              className={cn("rounded-[var(--radius)]", glassPrimaryButton)}
+              onClick={() => navigate("/duels")}
+            >
+              Back to Duels
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Loading state
   if (game === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen w-full items-center justify-center px-4 py-6">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading game...</p>
         </div>
       </div>
@@ -185,16 +218,21 @@ export function GamePage() {
   // Game not found
   if (game === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
+      <div className="flex min-h-screen w-full items-center justify-center px-4 py-6 sm:p-6">
+        <Card className={glassCardClassName("w-full max-w-md")}>
           <CardHeader>
             <CardTitle>Game Not Found</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               This game does not exist or has been deleted.
             </p>
-            <Button onClick={() => navigate("/duels")}>Back to Duels</Button>
+            <Button
+              className={cn("rounded-[var(--radius)]", glassPrimaryButton)}
+              onClick={() => navigate("/duels")}
+            >
+              Back to Duels
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -204,47 +242,52 @@ export function GamePage() {
   // Waiting for opponent
   if (game.status === "waiting") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-2xl w-full">
+      <div className="flex min-h-screen w-full items-center justify-center px-4 py-6 sm:p-6">
+        <Card className={glassCardClassName("w-full max-w-2xl p-4")}>
           <CardHeader>
-            <CardTitle className="text-center text-2xl">Waiting for Opponent</CardTitle>
+            <CardTitle className="text-center text-2xl">
+              Waiting for Opponent
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-center gap-4">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Swords className="w-10 h-10 text-primary" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/20">
+                  <Swords className="h-10 w-10 text-primary" />
                 </div>
-                <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
             </div>
 
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <p className="text-muted-foreground">
                 Finding a worthy opponent...
               </p>
               <p className="text-sm text-muted-foreground">
-                Player: <span className="font-mono text-foreground">{game.player1.name}</span>
+                Player:{" "}
+                <span className="font-mono text-foreground">
+                  {game.player1.name}
+                </span>
               </p>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground">
                 Text Preview
               </h3>
-              <div className="p-4 rounded bg-muted font-mono text-sm max-h-40 overflow-y-auto">
+              <div className="max-h-40 overflow-y-auto rounded bg-muted p-4 font-mono text-sm">
                 {referenceText}
               </div>
             </div>
 
             <Button
               variant="outline"
-              className="w-full"
+              className={cn("w-full rounded-[var(--radius)]", glassGhostButton)}
               onClick={handleLeaveGame}
             >
-              <X className="w-4 h-4 mr-2" />
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
           </CardContent>
@@ -260,13 +303,15 @@ export function GamePage() {
     const player2Stats = game.player2!;
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-3xl w-full">
+      <div className="flex min-h-screen w-full items-center justify-center px-4 py-6 sm:p-6">
+        <Card className={glassCardClassName("w-full max-w-3xl p-8")}>
           <CardHeader>
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border bg-background">
-                <Trophy className={`w-5 h-5 ${won ? "text-yellow-500" : "text-muted-foreground"}`} />
-                <span className="font-bold text-lg">
+            <div className="space-y-4 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1">
+                <Trophy
+                  className={`h-5 w-5 ${won ? "text-yellow-500" : "text-muted-foreground"}`}
+                />
+                <span className="text-lg font-bold">
                   {won ? "VICTORY!" : "DEFEAT"}
                 </span>
               </div>
@@ -277,9 +322,14 @@ export function GamePage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Player Stats Comparison */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Player 1 */}
-              <Card className={player1Stats.id === game.winnerId ? "border-primary" : ""}>
+              <Card
+                className={cn(
+                  glassCardClassName("shadow-none"),
+                  player1Stats.id === game.winnerId && "border-primary/50",
+                )}
+              >
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>{player1Stats.name}</span>
@@ -309,7 +359,12 @@ export function GamePage() {
               </Card>
 
               {/* Player 2 */}
-              <Card className={player2Stats.id === game.winnerId ? "border-primary" : ""}>
+              <Card
+                className={cn(
+                  glassCardClassName("shadow-none"),
+                  player2Stats.id === game.winnerId && "border-primary/50",
+                )}
+              >
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>{player2Stats.name}</span>
@@ -341,13 +396,14 @@ export function GamePage() {
 
             <div className="flex gap-4">
               <Button
-                className="flex-1"
+                className={cn("flex-1 rounded-[var(--radius)]", glassPrimaryButton)}
                 onClick={() => navigate("/duels")}
               >
                 Find Another Match
               </Button>
               <Button
                 variant="outline"
+                className={cn("rounded-[var(--radius)]", glassGhostButton)}
                 onClick={() => navigate("/statistics")}
               >
                 View Statistics
@@ -362,22 +418,22 @@ export function GamePage() {
   // Active game
   return (
     <div className="min-h-screen p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-4">
+      <div className="mx-auto max-w-7xl space-y-4">
         {/* Player Progress Bars */}
-        <Card>
+        <Card className={glassCardClassName()}>
           <CardContent className="p-6">
             <div className="space-y-6">
               {/* Current Player */}
               <div>
-                <div className="flex justify-between text-sm font-mono mb-2">
-                  <span className="text-primary font-bold">
+                <div className="mb-2 flex justify-between font-mono text-sm">
+                  <span className="font-bold text-primary">
                     YOU ({currentPlayer?.name})
                   </span>
                   <span className="text-muted-foreground">
                     {stats.wpm} WPM • {stats.accuracy}% • {stats.progress}%
                   </span>
                 </div>
-                <div className="h-3 bg-background/40 rounded-full overflow-hidden border border-border">
+                <div className="h-3 overflow-hidden rounded-full border border-border bg-background/40">
                   <motion.div
                     className="h-full bg-primary"
                     style={{ width: `${stats.progress}%` }}
@@ -390,15 +446,16 @@ export function GamePage() {
 
               {/* Opponent */}
               <div>
-                <div className="flex justify-between text-sm font-mono mb-2">
-                  <span className="text-destructive font-bold">
+                <div className="mb-2 flex justify-between font-mono text-sm">
+                  <span className="font-bold text-destructive">
                     OPPONENT ({opponent?.name})
                   </span>
                   <span className="text-muted-foreground">
-                    {opponent?.wpm ?? 0} WPM • {opponent?.accuracy ?? 100}% • {opponent?.progress ?? 0}%
+                    {opponent?.wpm ?? 0} WPM • {opponent?.accuracy ?? 100}% •{" "}
+                    {opponent?.progress ?? 0}%
                   </span>
                 </div>
-                <div className="h-3 bg-background/40 rounded-full overflow-hidden border border-border">
+                <div className="h-3 overflow-hidden rounded-full border border-border bg-background/40">
                   <motion.div
                     className="h-full bg-destructive"
                     style={{ width: `${opponent?.progress ?? 0}%` }}
@@ -411,15 +468,16 @@ export function GamePage() {
         </Card>
 
         {/* Typing Area */}
-        <Card>
+        <Card className={glassCardClassName()}>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-mono text-muted-foreground uppercase">
+              <CardTitle className="font-mono text-sm uppercase text-muted-foreground">
                 Type the text below
               </CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
+                className={cn("rounded-[var(--radius)]", glassGhostButton)}
                 onClick={handleSurrender}
               >
                 Surrender
@@ -427,8 +485,8 @@ export function GamePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="relative font-mono text-base leading-relaxed p-6 rounded bg-muted min-h-[400px] whitespace-pre-wrap">
-              {referenceText.split("").map((char, idx) => {
+            <div className="relative min-h-[400px] rounded bg-muted p-6 font-mono text-base leading-relaxed whitespace-pre-wrap">
+              {referenceText.split("").map((char: string, idx: number) => {
                 let className = "text-muted-foreground";
                 
                 if (idx < typedText.length) {
@@ -454,7 +512,7 @@ export function GamePage() {
             </div>
 
             {isCompleted && (
-              <div className="mt-4 p-4 rounded bg-primary/10 border border-primary text-center">
+              <div className="mt-4 rounded border border-primary bg-primary/10 p-4 text-center">
                 <p className="font-semibold text-primary">
                   ✓ Completed! Waiting for opponent...
                 </p>

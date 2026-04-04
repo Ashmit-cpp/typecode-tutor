@@ -1,35 +1,29 @@
 import type { ReactNode } from "react";
-import Squares from "@/components/ui/Squares";
 import { AppHeader } from "@/components/app-header";
-import { useTheme } from "@/components/theme-provider";
 
 interface PracticeLayoutProps {
   children: ReactNode;
 }
 
 export default function PracticeLayout({ children }: PracticeLayoutProps) {
-  const theme = useTheme();
-
   return (
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary">
-      {/* Global Squares Background */}
-      <Squares
-        speed={0.1}
-        squareSize={40}
-        direction="down" // up, down, left, right, diagonal
-        borderColor={theme.theme === "dark" ? "#201C2E" : "#E0DDDC"}
-        hoverFillColor="#222"
-      />
-
-      {/* Radial vignette overlay (global) */}
       <div
-        className="
-          pointer-events-none
-          absolute inset-0
-          z-[1]
-          bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_40%,rgba(0,0,0,0.55)_100%)]
-        "
-      />
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+        aria-hidden
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 50% at 20% -10%, oklch(0.80 0.124 305 / 0.28) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 110%, oklch(0.88 0.102 213 / 0.22) 0%, transparent 55%),
+              radial-gradient(ellipse 40% 30% at 60% 50%, oklch(0.80 0.124 305 / 0.10) 0%, transparent 70%)
+            `,
+          }}
+        />
+        <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_40%,rgba(0,0,0,0.30)_100%)]" />
+      </div>
 
       {/* App Shell */}
       <div className="relative z-10 flex flex-col justify-between min-h-screen">
@@ -39,9 +33,7 @@ export default function PracticeLayout({ children }: PracticeLayoutProps) {
 
         <div className="p-4 px-6 border-t border-border bg-transparent backdrop-blur-sm">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-            <div className="font-mono">
-              © 2025 KeyClash. MIT Licensed.
-            </div>
+            <div className="font-mono">© 2026 KeyClash. MIT Licensed.</div>
 
             <div className="flex gap-6">
               <a href="#" className="hover:text-foreground transition-colors">

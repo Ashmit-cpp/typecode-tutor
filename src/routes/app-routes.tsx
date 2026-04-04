@@ -7,9 +7,6 @@ const MainLayout = lazy(() => import("@/layouts/MainLayout"));
 const PracticeLayout = lazy(() => import("@/layouts/PracticeLayout"));
 import { toast } from "sonner"
 
-const LandingPage = lazy(() =>
-  import("@/pages/landing-page").then((mod) => ({ default: mod.default }))
-);
 const PracticePage = lazy(() =>
   import("@/pages/practice-page").then((mod) => ({ default: mod.PracticePage }))
 );
@@ -24,6 +21,7 @@ const StatisticsPage = lazy(() =>
 const GamePage = lazy(() =>
   import("@/pages/game-page").then((mod) => ({ default: mod.GamePage }))
 );
+
 
 // Wrapper component for Duels page to handle hooks
 function DuelsPageWrapper() {
@@ -68,9 +66,9 @@ export function AppRoutes() {
       <Route
         path="/"
         element={
-          <MainLayout>
-            <LandingPage />
-          </MainLayout>
+          <Suspense fallback={<LoadingState label="Loading..." />}>
+            <DuelsPageWrapper />
+          </Suspense>
         }
       />
       <Route
@@ -85,7 +83,9 @@ export function AppRoutes() {
         path="/game/:gameId"
         element={
           <Suspense fallback={<LoadingState label="Loading game..." />}>
-            <GamePage />
+            <MainLayout>
+              <GamePage />
+            </MainLayout>
           </Suspense>
         }
       />

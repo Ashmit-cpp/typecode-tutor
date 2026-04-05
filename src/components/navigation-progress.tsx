@@ -13,7 +13,7 @@ export function NavigationProgress() {
   const [visible, setVisible] = useState(false);
   const [completing, setCompleting] = useState(false);
   const completingRef = useRef(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prevPathRef = useRef(location.pathname);
   const isFirstRender = useRef(true);
 

@@ -1,10 +1,11 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { LoadingState } from "@/components/ui/loading-state";
+import { NavigationProgress } from "@/components/navigation-progress";
+import { PageShellFallback } from "@/components/page-shell-fallback";
 import { useFindOrCreateGame } from "@/lib/game-hooks";
-const MainLayout = lazy(() => import("@/layouts/MainLayout"));
-const PracticeLayout = lazy(() => import("@/layouts/PracticeLayout"));
+import MainLayout from "@/layouts/MainLayout";
+import PracticeLayout from "@/layouts/PracticeLayout";
 import { toast } from "sonner"
 
 const PracticePage = lazy(() =>
@@ -61,55 +62,38 @@ function DuelsPageWrapper() {
 
 export function AppRoutes() {
   return (
-    <Suspense fallback={<div className="bg-background text-foreground"></div>}>
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Suspense fallback={<LoadingState label="Loading..." />}>
-            <DuelsPageWrapper />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/duels"
-        element={
-          <Suspense fallback={<LoadingState label="Loading duels..." />}>
-            <DuelsPageWrapper />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/game/:gameId"
-        element={
-          <Suspense fallback={<LoadingState label="Loading game..." />}>
-            <MainLayout>
-              <GamePage />
-            </MainLayout>
-          </Suspense>
-        }
-      />
-      <Route
-        path="/practice"
-        element={
-          <Suspense fallback={<LoadingState label="Loading practice..." />}>
-            <PracticeLayout>
-              <PracticePage />
-            </PracticeLayout>
-          </Suspense>
-        }
-      />
-      <Route
-        path="/statistics"
-        element={
-          <Suspense fallback={<LoadingState label="Loading statistics..." />}>
-            <PracticeLayout>
-              <StatisticsPage />
-            </PracticeLayout>
-          </Suspense>
-          }
-        />
-      </Routes>
-    </Suspense>
+    <>
+      <NavigationProgress />
+      <Suspense fallback={<PageShellFallback />}>
+        <Routes>
+          <Route path="/" element={<DuelsPageWrapper />} />
+          <Route path="/duels" element={<DuelsPageWrapper />} />
+          <Route
+            path="/game/:gameId"
+            element={
+              <MainLayout>
+                <GamePage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/practice"
+            element={
+              <PracticeLayout>
+                <PracticePage />
+              </PracticeLayout>
+            }
+          />
+          <Route
+            path="/statistics"
+            element={
+              <PracticeLayout>
+                <StatisticsPage />
+              </PracticeLayout>
+            }
+          />
+        </Routes>
+      </Suspense>
+    </>
   );
 }

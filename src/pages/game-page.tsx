@@ -5,7 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Trophy, Swords, X } from "lucide-react";
+import { History, Loader2, Trophy, Swords, X } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   useGame,
@@ -208,7 +208,7 @@ export function GamePage() {
     return (
       <div className="flex min-h-screen w-full items-center justify-center px-4 py-6">
         <div className="text-center">
-          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-page-chalk" />
           <p className="text-muted-foreground">Loading game...</p>
         </div>
       </div>
@@ -252,10 +252,10 @@ export function GamePage() {
           <CardContent className="space-y-6">
             <div className="flex items-center justify-center gap-4">
               <div className="relative">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/20">
-                  <Swords className="h-10 w-10 text-primary" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-page-chalk/20">
+                  <Swords className="h-10 w-10 text-page-chalk" />
                 </div>
-                <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <div className="absolute inset-0 animate-spin rounded-full border-4 border-page-chalk border-t-transparent" />
               </div>
             </div>
 
@@ -309,13 +309,13 @@ export function GamePage() {
             <div className="space-y-4 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1">
                 <Trophy
-                  className={`h-5 w-5 ${won ? "text-yellow-500" : "text-muted-foreground"}`}
+                  className={`h-5 w-5 ${won ? "text-chart-3" : "text-muted-foreground"}`}
                 />
                 <span className="text-lg font-bold">
                   {won ? "VICTORY!" : "DEFEAT"}
                 </span>
               </div>
-              <CardTitle className="text-3xl">
+              <CardTitle className="text-3xl mb-4">
                 {won ? "Congratulations!" : "Better luck next time!"}
               </CardTitle>
             </div>
@@ -327,14 +327,14 @@ export function GamePage() {
               <Card
                 className={cn(
                   glassCardClassName("shadow-none"),
-                  player1Stats.id === game.winnerId && "border-primary/50",
+                  player1Stats.id === game.winnerId && "border-page-chalk/50",
                 )}
               >
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>{player1Stats.name}</span>
                     {player1Stats.id === game.winnerId && (
-                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      <Trophy className="w-5 h-5 text-chart-3" />
                     )}
                   </CardTitle>
                 </CardHeader>
@@ -362,14 +362,14 @@ export function GamePage() {
               <Card
                 className={cn(
                   glassCardClassName("shadow-none"),
-                  player2Stats.id === game.winnerId && "border-primary/50",
+                  player2Stats.id === game.winnerId && "border-page-chalk/50",
                 )}
               >
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>{player2Stats.name}</span>
                     {player2Stats.id === game.winnerId && (
-                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      <Trophy className="w-5 h-5 text-chart-3" />
                     )}
                   </CardTitle>
                 </CardHeader>
@@ -394,16 +394,27 @@ export function GamePage() {
               </Card>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Button
-                className={cn("flex-1 rounded-[var(--radius)]", glassPrimaryButton)}
+                className={cn(
+                  "min-h-11 flex-1 rounded-[var(--radius)] sm:min-w-[160px]",
+                  glassPrimaryButton,
+                )}
                 onClick={() => navigate("/duels")}
               >
                 Find Another Match
               </Button>
               <Button
                 variant="outline"
-                className={cn("rounded-[var(--radius)]", glassGhostButton)}
+                className={cn("min-h-11 flex-1 rounded-[var(--radius)] sm:min-w-[140px]", glassGhostButton)}
+                onClick={() => navigate("/duels/history")}
+              >
+                <History className="mr-2 h-4 w-4" aria-hidden />
+                Duel history
+              </Button>
+              <Button
+                variant="outline"
+                className={cn("min-h-11 flex-1 rounded-[var(--radius)] sm:min-w-[140px]", glassGhostButton)}
                 onClick={() => navigate("/statistics")}
               >
                 View Statistics
@@ -419,6 +430,25 @@ export function GamePage() {
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-7xl space-y-4">
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "kc-page-hero-icon-wrap mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] border",
+            )}
+            aria-hidden
+          >
+            <Swords className="kc-page-hero-icon size-5" />
+          </div>
+          <div>
+            <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Live duel
+            </h1>
+            <p className="kc-page-hero-subtitle mt-1 font-mono text-sm">
+              Same snippet — first clean finish wins.
+            </p>
+          </div>
+        </div>
+
         {/* Player Progress Bars */}
         <Card className={glassCardClassName()}>
           <CardContent className="p-6">
@@ -426,7 +456,7 @@ export function GamePage() {
               {/* Current Player */}
               <div>
                 <div className="mb-2 flex justify-between font-mono text-sm">
-                  <span className="font-bold text-primary">
+                  <span className="font-bold text-page-chalk">
                     YOU ({currentPlayer?.name})
                   </span>
                   <span className="text-muted-foreground">
@@ -435,7 +465,7 @@ export function GamePage() {
                 </div>
                 <div className="h-3 overflow-hidden rounded-full border border-border bg-background/40">
                   <motion.div
-                    className="h-full bg-primary"
+                    className="h-full bg-page-chalk"
                     style={{ width: `${stats.progress}%` }}
                     transition={{ ease: "linear" }}
                   />
@@ -504,7 +534,7 @@ export function GamePage() {
                   <span key={idx} className={className}>
                     {char}
                     {idx === currentIndex && (
-                      <span className="absolute left-0 top-0 w-0.5 h-full bg-primary animate-pulse" />
+                      <span className="absolute left-0 top-0 w-0.5 h-full bg-page-chalk animate-pulse" />
                     )}
                   </span>
                 );
@@ -512,8 +542,8 @@ export function GamePage() {
             </div>
 
             {isCompleted && (
-              <div className="mt-4 rounded border border-primary bg-primary/10 p-4 text-center">
-                <p className="font-semibold text-primary">
+              <div className="mt-4 rounded border border-page-chalk bg-page-chalk/10 p-4 text-center">
+                <p className="font-semibold text-page-chalk">
                   ✓ Completed! Waiting for opponent...
                 </p>
               </div>

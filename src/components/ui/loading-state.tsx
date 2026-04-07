@@ -15,7 +15,7 @@ function LoadingState({ label = "Loading…", helperText, className }: LoadingSt
         className
       )}
     >
-      <Spinner className="size-6 text-primary" />
+      <Spinner className="size-6 text-page-chalk" />
       <p className="text-sm font-medium text-foreground">{label}</p>
       {helperText && <p className="text-xs text-muted-foreground">{helperText}</p>}
     </div>

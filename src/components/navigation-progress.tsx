@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  getPageChalkIdFromPathname,
+  pageChalkCssValue,
+} from "@/lib/page-chalk";
 
 /**
  * Thin top progress bar that tracks client-side navigations.
@@ -12,10 +16,19 @@ export function NavigationProgress() {
   const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [completing, setCompleting] = useState(false);
+  /** Destination route (set on internal link click so bar tint matches where we’re going). */
+  const [pendingTargetPath, setPendingTargetPath] = useState<string | null>(
+    null,
+  );
   const completingRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prevPathRef = useRef(location.pathname);
   const isFirstRender = useRef(true);
+
+  const pathForChalk = pendingTargetPath ?? location.pathname;
+  const navChalk = pageChalkCssValue(
+    getPageChalkIdFromPathname(pathForChalk),
+  );
 
   // Detect internal link clicks to start the bar BEFORE route change
   useEffect(() => {
@@ -30,6 +43,7 @@ export function NavigationProgress() {
 
       completingRef.current = false;
       setCompleting(false);
+      setPendingTargetPath(targetPath);
       setVisible(true);
 
       // Safety reset if navigation never completes (e.g. blocked)
@@ -56,6 +70,7 @@ export function NavigationProgress() {
     }
     if (prevPathRef.current === location.pathname) return;
     prevPathRef.current = location.pathname;
+    setPendingTargetPath(null);
 
     clearTimeout(timeoutRef.current);
     completingRef.current = true;
@@ -73,9 +88,10 @@ export function NavigationProgress() {
       {visible && (
         <motion.div
           key="nav-progress"
-          className="pointer-events-none fixed left-0 top-0 z-[9999] h-[2px] bg-primary"
+          className="pointer-events-none fixed left-0 top-0 z-[9999] h-[2px]"
           style={{
-            boxShadow: "0 0 8px oklch(0.80 0.124 305 / 0.7), 0 0 20px oklch(0.80 0.124 305 / 0.35)",
+            backgroundColor: navChalk,
+            boxShadow: `0 0 14px color-mix(in oklch, ${navChalk} 55%, transparent)`,
           }}
           initial={{ width: "0%", opacity: 1 }}
           animate={

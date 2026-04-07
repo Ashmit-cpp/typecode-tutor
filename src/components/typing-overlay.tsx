@@ -2,13 +2,14 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { glass, glassCardClassName, glassPrimaryButton } from "@/lib/glass-styles";
+import { glass, glassCardClassName, glassGhostButton, glassPrimaryButton } from "@/lib/glass-styles";
 import { cn } from "@/lib/utils";
 import { SAMPLE_TEXTS } from "@/lib/sample-text";
-import { Shuffle } from "lucide-react";
+import { ArrowLeft, Keyboard, Shuffle } from "lucide-react";
 import { TypingTextArea } from "./typing-text-area";
 import { ProgressCard } from "./typing-stats";
 import { usePracticeModeStore } from "@/lib/practice-store";
@@ -181,16 +182,48 @@ export function TypingOverlay() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 h-full">
-      <div className="max-w-9/12 mx-auto space-y-6">
-        {/* Header Card */}
-        <Card className={glassCardClassName() }>
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "kc-page-hero-icon-wrap mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] border",
+            )}
+            aria-hidden
+          >
+            <Keyboard className="kc-page-hero-icon size-5" />
+          </div>
+          <div>
+            <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Practice
+            </h1>
+            <p className="kc-page-hero-subtitle mt-1 font-mono text-sm">
+              Solo typing drills, text or algorithm snippets.
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          asChild
+          className={cn(
+            "w-full shrink-0 rounded-[var(--radius)] font-mono text-xs uppercase tracking-widest sm:w-auto",
+            glassGhostButton,
+          )}
+        >
+          <Link to="/statistics" className="inline-flex items-center justify-center gap-2">
+            <ArrowLeft className="size-4" />
+            Statistics
+          </Link>
+        </Button>
+      </div>
+
+      <Card className={glassCardClassName()}>
           {typingMode === "input" ? (
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
               <CardHeader className="flex-1">
                 <div>
-                  <CardTitle className="font-semibold text-xl text-secondary uppercase tracking-wide my-3 block">
-                    Select Practice Mode
+                  <CardTitle className="mb-3 block font-sans text-lg font-semibold tracking-tight text-foreground">
+                    Mode
                   </CardTitle>
                   <Select value={practiceMode} onValueChange={(value: 'practice' | 'algorithm') => setMode(value)}>
                     <SelectTrigger
@@ -206,16 +239,15 @@ export function TypingOverlay() {
                     </SelectContent>
                   </Select>
                 </div>
-                <CardDescription className="text-sm sm:text-base mt-2">
-                  {practiceMode === 'algorithm'
-                    ? 'Generate algorithm code or enter your own to practice typing programming concepts'
-                    : 'Enter your text or generate random content to start practicing'
-                  }
+                <CardDescription className="mt-2 text-sm sm:text-base">
+                  {practiceMode === "algorithm"
+                    ? "Generate algorithm code or enter your own to practice typing programming concepts."
+                    : "Enter your text or generate random content to start practicing."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="lg:self-center">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Quick Start
+                <h3 className="mb-3 font-sans text-sm font-semibold text-muted-foreground">
+                  Quick start
                 </h3>
                 <div className="space-y-2">
                   <Button
@@ -254,9 +286,7 @@ export function TypingOverlay() {
           onClearText={clearText}
           onTryAgain={tryAgain}
         />
-        </Card>
-
-      </div>
+      </Card>
 
       <style>{`
         @keyframes blink {

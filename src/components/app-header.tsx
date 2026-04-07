@@ -11,6 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { KeyClashWordmark } from "@/components/keyclash-wordmark";
+import {
+  navLinkActiveChalkClass,
+  navLinkHoverChalkClass,
+  type PageChalkId,
+} from "@/lib/page-chalk";
 import { Menu, TerminalIcon } from "lucide-react";
 
 export function AppHeader() {
@@ -24,14 +30,21 @@ export function AppHeader() {
 
   if (!mounted) return null;
 
-  const isDuel = location.pathname === "/" || location.pathname === "/duels";
+  const isDuel =
+    location.pathname === "/" ||
+    location.pathname === "/duels" ||
+    location.pathname.startsWith("/game/");
+  const isDuelHistory = location.pathname === "/duels/history";
   const isPractice = location.pathname === "/practice";
   const isStats = location.pathname === "/statistics";
 
-  const navLinkClass = (active: boolean) =>
-    `text-xs font-sans font-medium uppercase tracking-[0.2em] transition-colors ${
-      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-    }`;
+  const navLinkClass = (active: boolean, chalk: PageChalkId) =>
+    cn(
+      "text-xs font-sans font-medium uppercase tracking-[0.2em] transition-colors",
+      active
+        ? navLinkActiveChalkClass[chalk]
+        : cn("text-muted-foreground/60", navLinkHoverChalkClass[chalk]),
+    );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/30 backdrop-blur-md">
@@ -39,22 +52,25 @@ export function AppHeader() {
         <Link
           to="/"
           aria-label="KeyClash home"
-          className="flex items-center gap-2 font-mono font-bold text-primary tracking-tight"
+          className="flex items-center gap-2 font-mono font-bold tracking-tight"
         >
-          <TerminalIcon
-            className="size-6"
-          />
-          <span className="text-primary text-lg">KeyClash</span>
+          <TerminalIcon className="size-6 text-secondary" />
+          <KeyClashWordmark className="text-lg" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link to="/" className={navLinkClass(isDuel)}>
+          <Link to="/" className={navLinkClass(isDuel, "duel")}>
             Duel
           </Link>
-          <Link to="/practice" className={navLinkClass(isPractice)}>
+          {isLoaded && isSignedIn && (
+            <Link to="/duels/history" className={navLinkClass(isDuelHistory, "history")}>
+              History
+            </Link>
+          )}
+          <Link to="/practice" className={navLinkClass(isPractice, "practice")}>
             Practice
           </Link>
-          <Link to="/statistics" className={navLinkClass(isStats)}>
+          <Link to="/statistics" className={navLinkClass(isStats, "stats")}>
             Stats
           </Link>
         </nav>
@@ -68,7 +84,7 @@ export function AppHeader() {
                   appearance={{
                     elements: {
                       avatarBox:
-                        "w-8 h-8 border-2 border-primary rounded-full ring-0 shadow-[0_0_12px_oklch(0.80_0.124_305_/_0.35)]",
+                        "w-8 h-8 border-2 border-primary rounded-full ring-0 shadow-[var(--glow-primary-avatar)]",
                       userButtonPopoverCard: cn(
                         "rounded-[var(--radius)]",
                         glass.popover,
@@ -123,17 +139,27 @@ export function AppHeader() {
               className={cn("w-48 rounded-[var(--radius)] border-0 shadow-none", glass.popover)}
             >
               <DropdownMenuItem asChild>
-                <Link to="/" className="font-sans text-xs uppercase tracking-widest">
+                <Link to="/" className={cn(navLinkClass(isDuel, "duel"), "tracking-widest")}>
                   Duel
                 </Link>
               </DropdownMenuItem>
+              {isLoaded && isSignedIn && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    to="/duels/history"
+                    className={cn(navLinkClass(isDuelHistory, "history"), "tracking-widest")}
+                  >
+                    History
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
-                <Link to="/practice" className="font-sans text-xs uppercase tracking-widest">
+                <Link to="/practice" className={cn(navLinkClass(isPractice, "practice"), "tracking-widest")}>
                   Practice
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/statistics" className="font-sans text-xs uppercase tracking-widest">
+                <Link to="/statistics" className={cn(navLinkClass(isStats, "stats"), "tracking-widest")}>
                   Stats
                 </Link>
               </DropdownMenuItem>

@@ -4,16 +4,19 @@ export const STEPS = [
     n: "01",
     title: "Enter the arena",
     body: "Queue for a ranked duel or invite a rival with a single link. ELO-based matchmaking pairs you in seconds.",
+    accentVar: "--chalk-indigo",
   },
   {
     n: "02",
     title: "Type the same snippet",
     body: "Both players receive identical code — byte for byte, language for language. No home-field advantage.",
+    accentVar: "--chalk-teal",
   },
   {
     n: "03",
     title: "First to finish wins",
     body: "Accuracy gates apply. Fastest clean compile takes the round, your ELO, and the bragging rights.",
+    accentVar: "--chalk-mauve",
   },
 ];
 
@@ -22,25 +25,25 @@ export const FEATURES = [
     symbol: "1v1",
     label: "Real-time head-to-head",
     desc: "See your opponent's live progress. Every keystroke, every mistake — no lag, no illusion.",
-    colorClass: "text-primary",
+    accentVar: "--chalk-indigo",
   },
   {
     symbol: "{ }",
     label: "Real code, real syntax",
     desc: "Snippets pulled from actual production repos across TS, Go, Rust, C++, Python and more.",
-    colorClass: "text-primary",
+    accentVar: "--chalk-teal",
   },
   {
     symbol: "ELO",
     label: "Ranked seasons",
     desc: "Skill-based ELO matchmaking with seasonal ladders, placement matches, and rank decay.",
-    colorClass: "text-secondary",
+    accentVar: "--chalk-amber",
   },
   {
     symbol: "⚡",
     label: "Sub-20ms latency",
     desc: "Input paths tuned so close, nothing sits between your fingers and the leaderboard.",
-    colorClass: "text-primary",
+    accentVar: "--chalk-coral",
   },
 ];
 

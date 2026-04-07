@@ -1,4 +1,5 @@
 import { getLeaderboardPathname, scrollToLeaderboard } from "@/lib/leaderboard-nav";
+import { KeyClashWordmark } from "@/components/keyclash-wordmark";
 import { glass } from "@/lib/glass-styles";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
@@ -16,14 +17,14 @@ export function Footer() {
       <Wrap>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-sans text-[13px] font-bold text-primary tracking-tight">KeyClash</span>
+            <KeyClashWordmark className="font-mono text-[13px] font-bold tracking-tight" />
             <span className="font-mono text-[9px] text-muted-foreground tracking-[0.15em]">· The faster compiler wins.</span>
           </div>
 
           <div className="flex gap-6">
             <Link
               to="/practice"
-              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-[color:var(--page-chalk)] transition-colors"
             >
               Practice
             </Link>
@@ -35,14 +36,14 @@ export function Footer() {
                   scrollToLeaderboard(location.pathname);
                 }
               }}
-              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+              className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground hover:text-[color:var(--page-chalk)] transition-colors"
             >
               Leaderboard
             </Link>
           </div>
 
           <p className="font-mono text-[9px] text-muted-foreground tracking-[0.12em]">
-            <span className="text-primary">■</span> you &nbsp;
+            <span className="text-[color:var(--page-chalk)]">■</span> you &nbsp;
             <span className="text-secondary">■</span> opponent
           </p>
         </div>

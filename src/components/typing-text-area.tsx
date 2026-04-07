@@ -81,7 +81,7 @@ export function TypingTextArea({
           <span
             key={`cursor-${idx}`}
             ref={cursorRef}
-            className="inline-block align-text-bottom border-l-2 border-primary animate-pulse"
+            className="inline-block align-text-bottom border-l-2 border-page-chalk animate-pulse"
             style={{
               height: "1.2em",
               marginRight: "1px",
@@ -96,7 +96,7 @@ export function TypingTextArea({
         className =
           typedText[idx] === char
             ? "text-secondary"
-            : "text-red-400 bg-red-400/10 rounded-sm px-0.1";
+            : "rounded-sm bg-destructive/10 px-0.1 text-destructive";
       }
 
       // Handle special characters
@@ -129,7 +129,7 @@ export function TypingTextArea({
         <span
           key="cursor-end"
           ref={cursorRef}
-          className="inline-block align-text-bottom border-l-2 border-primary animate-pulse"
+          className="inline-block align-text-bottom border-l-2 border-page-chalk animate-pulse"
           style={{
             height: "1.2em",
             marginRight: "1px",
@@ -141,7 +141,7 @@ export function TypingTextArea({
     // Add completion indicator
     if (isCompleted) {
       nodes.push(
-        <span key="completed" className="ml-2 text-green-500">
+        <span key="completed" className="ml-2 text-chart-4">
           <CheckCircle className="inline-block w-5 h-5" />
         </span>
       );
@@ -166,7 +166,7 @@ export function TypingTextArea({
             <Button
               onClick={onStartTyping}
               disabled={!referenceText.trim()}
-              className="flex items-center gap-2 flex-1 sm:flex-none bg-primary hover:bg-primary/90"
+              className="flex items-center gap-2 flex-1 sm:flex-none bg-page-chalk text-page-chalk-fg hover:bg-page-chalk/90"
             >
               <Play className="w-4 h-4" />
               Start Typing
@@ -191,7 +191,7 @@ export function TypingTextArea({
               className={cn(
                 "h-[432px] w-full rounded-md border border-input bg-transparent px-4 py-3",
                 "font-mono text-lg leading-relaxed overflow-auto",
-                "focus-within:border-primary/50 transition-colors"
+                "focus-within:border-page-chalk/50 transition-colors"
               )}
               style={{
                 whiteSpace: "pre-wrap",
@@ -204,25 +204,25 @@ export function TypingTextArea({
             </div>
 
             {isCompleted && (
-              <div className="absolute inset-0 bg-primary/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <div className="text-center p-6 bg-background/90 rounded-lg border shadow-lg">
-                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold mb-2">
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-page-chalk/10 backdrop-blur-sm">
+                <div className="rounded-[var(--radius)] border border-border bg-card/90 p-6 text-center shadow-lg">
+                  <CheckCircle className="mx-auto mb-3 h-12 w-12 text-chart-4" />
+                  <h3 className="mb-2 text-lg font-semibold">
                     Excellent Work!
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="mb-4 text-sm text-muted-foreground">
                     You completed the typing exercise
                   </p>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex justify-center gap-2">
                     <Badge
                       variant="secondary"
-                      className="bg-green-100 text-green-800"
+                      className="border border-page-chalk/25 bg-page-chalk/15 font-mono text-page-chalk"
                     >
                       {stats.wpm} WPM
                     </Badge>
                     <Badge
                       variant="secondary"
-                      className="bg-blue-100 text-blue-800"
+                      className="border border-secondary/30 bg-secondary/15 font-mono text-secondary-foreground"
                     >
                       {stats.accuracy}% Accuracy
                     </Badge>

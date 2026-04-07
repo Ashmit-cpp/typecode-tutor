@@ -26,26 +26,26 @@ export function LiveStatsFooter({ stats, show = true }: LiveStatsFooterProps) {
 
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-blue-400" />
+              <TrendingUp className="w-4 h-4 text-page-chalk" />
               <span className="text-sm font-medium">WPM</span>
             </div>
-            <div className="text-lg font-bold text-blue-400">{stats.wpm}</div>
+            <div className="text-lg font-bold text-page-chalk">{stats.wpm}</div>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-green-400" />
+              <Target className="w-4 h-4 text-chart-4" />
               <span className="text-sm font-medium">Accuracy</span>
             </div>
-            <div className="text-lg font-bold text-green-400">
+            <div className="text-lg font-bold text-chart-4">
               {stats.accuracy}%
             </div>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-background/50 w-1/4">
             <div className="flex items-center gap-2">
-              <Timer className="w-4 h-4 text-primary" />
+              <Timer className="w-4 h-4 text-secondary" />
               <span className="text-sm font-medium">Time</span>
             </div>
-            <div className="text-lg font-bold text-primary">
+            <div className="text-lg font-bold text-secondary">
               {Math.floor(stats.timeElapsed)}s
             </div>
           </div>

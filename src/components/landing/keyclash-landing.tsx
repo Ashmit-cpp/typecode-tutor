@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { KeyClashWordmark } from "@/components/keyclash-wordmark";
 import { glass } from "@/lib/glass-styles";
 import { FEATURES, MOCK_LEADERBOARD } from "./constants";
 import { STEPS } from "./constants";
@@ -25,6 +27,14 @@ const staggerContainer = (staggerChildren = 0.08, delayChildren = 0) => ({
 
 /** Viewport trigger defaults shared across sections */
 const inView = { once: true, amount: 0.18 } as const;
+
+/** Corner accents for the CTA card — chalk palette */
+const CTA_CORNER_CHALK = [
+  "--chalk-indigo",
+  "--chalk-teal",
+  "--chalk-amber",
+  "--chalk-mauve",
+] as const;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -92,11 +102,11 @@ function LiveTag({ children }: { children: React.ReactNode }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] text-primary",
-        "rounded-sm border border-primary/25 bg-primary/[0.08] px-3 py-1.5 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]",
+        "inline-flex items-center gap-1.5 font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] text-muted-foreground",
+        "rounded-sm border border-border/80 bg-muted/20 px-3 py-1.5 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]",
       )}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-[kc-cursor-blink_1.4s_step-end_infinite] shadow-[0_0_8px_var(--primary)]" />
+      <span className="h-1.5 w-1.5 animate-[kc-cursor-blink_1.4s_step-end_infinite] rounded-full bg-secondary shadow-[0_0_8px_var(--secondary)]" />
       {children}
     </span>
   );
@@ -166,12 +176,12 @@ function TerminalPreview() {
           "bg-white/[0.03] backdrop-blur-md",
         )}
       >
-        <span className="h-2.5 w-2.5 rounded-full bg-destructive/50 shadow-[0_0_6px_oklch(0.58_0.195_20_/_0.5)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-destructive/50 shadow-[var(--shadow-destructive-dot)]" />
         <span
           className="h-2.5 w-2.5 rounded-full"
-          style={{ background: "oklch(0.85 0.120 80 / 0.55)" }}
+          style={{ background: "var(--landing-terminal-dot-warn)" }}
         />
-        <span className="h-2.5 w-2.5 rounded-full bg-primary/50 shadow-[0_0_6px_var(--primary)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-secondary/55 shadow-[0_0_6px_color-mix(in_oklch,var(--secondary)_40%,transparent)]" />
         <span className="flex-1" />
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/90 sm:text-xs">
           match_arena.ts
@@ -185,8 +195,7 @@ function TerminalPreview() {
           glass.divider,
         )}
         style={{
-          background:
-            "linear-gradient(180deg, oklch(0.12 0.032 282 / 0.72), oklch(0.10 0.030 282 / 0.85))",
+          background: "var(--landing-demo-code-gradient)",
           minHeight: 148,
         }}
       >
@@ -280,12 +289,12 @@ function KeyClashLandingHeroContent({
             <motion.h1
               variants={fadeUp}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="font-sans font-bold tracking-tight text-foreground leading-[0.96]"
+              className="font-mono font-bold tracking-tight leading-[0.96]"
               style={{
                 fontSize: "clamp(2.25rem, 9.5vw + 0.35rem, 5.75rem)",
               }}
             >
-              Key<span className="text-primary">Clash</span>
+              <KeyClashWordmark />
             </motion.h1>
 
             <motion.p
@@ -300,30 +309,38 @@ function KeyClashLandingHeroContent({
             <motion.div
               variants={fadeUp}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3"
+              className="mt-8 flex flex-col gap-3 sm:mt-10"
             >
-              <motion.button
-                onClick={onFindMatch}
-                whileHover={shouldReduceMotion ? {} : { y: -1, filter: "brightness(1.05)" }}
-                whileTap={shouldReduceMotion ? {} : { y: 0 }}
-                transition={{ duration: 0.15 }}
-                className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 font-mono text-base font-bold uppercase tracking-[0.1em] text-primary-foreground transition-colors duration-200 sm:w-auto",
-                  "border border-white/15 bg-primary/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_8px_32px_-4px_oklch(0.80_0.124_305_/_0.35)] backdrop-blur-md",
-                )}
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+                <motion.button
+                  onClick={onFindMatch}
+                  whileHover={shouldReduceMotion ? {} : { y: -1, filter: "brightness(1.05)" }}
+                  whileTap={shouldReduceMotion ? {} : { y: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className={cn(
+                    "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 font-mono text-base font-bold uppercase tracking-[0.1em] text-page-chalk-fg transition-colors duration-200 sm:w-auto",
+                    "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
+                  )}
+                >
+                  Find a match
+                </motion.button>
+                <button
+                  onClick={onPracticeSolo}
+                  className={cn(
+                    "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 font-mono text-base uppercase tracking-[0.1em] text-muted-foreground transition-all duration-200 sm:w-auto",
+                    "border-white/[0.12] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl",
+                    "hover:border-secondary/40 hover:bg-secondary/[0.06] hover:text-foreground",
+                  )}
+                >
+                  Practice solo
+                </button>
+              </div>
+              <Link
+                to="/duels/history"
+                className="font-mono text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
               >
-                Find a match
-              </motion.button>
-              <button
-                onClick={onPracticeSolo}
-                className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 font-mono text-base uppercase tracking-[0.1em] text-muted-foreground transition-all duration-200 sm:w-auto",
-                  "border-white/[0.12] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl",
-                  "hover:border-primary/35 hover:bg-primary/[0.08] hover:text-foreground",
-                )}
-              >
-                Practice solo
-              </button>
+                View duel history
+              </Link>
             </motion.div>
 
             <motion.div
@@ -344,7 +361,7 @@ function KeyClashLandingHeroContent({
                   variants={fadeUp}
                   transition={{ duration: 0.4, ease: "easeOut", delay: i * 0.07 }}
                 >
-                  <div className="font-mono text-[clamp(22px,3.5vw,28px)] font-bold text-primary leading-none tabular-nums">
+                  <div className="font-mono text-[clamp(22px,3.5vw,28px)] font-bold leading-none tabular-nums text-foreground">
                     {v}
                   </div>
                   <div className="font-mono text-xs sm:text-sm uppercase tracking-[0.14em] text-muted-foreground mt-2">
@@ -443,12 +460,19 @@ export function KeyClashLandingSectionsGrid({
                     variants={fadeUp}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                     className={cn(
-                      "group relative flex gap-4 overflow-hidden p-5 transition-colors duration-300 sm:gap-6 sm:p-7",
+                      "group relative flex gap-4 overflow-hidden border-l-2 p-5 transition-colors duration-300 sm:gap-6 sm:p-7",
                       glass.panelSubtle,
-                      "hover:border-primary/25 hover:bg-primary/[0.06]",
+                      "hover:border-border hover:bg-muted/20",
                     )}
+                    style={{
+                      ["--step-chalk" as string]: `var(${s.accentVar})`,
+                      borderLeftColor:
+                        "color-mix(in oklch, var(--step-chalk) 32%, transparent)",
+                    }}
                   >
-                    <div className="font-mono text-sm sm:text-base font-bold text-primary/40 tabular-nums pt-0.5 w-5 sm:w-6 shrink-0">
+                    <div
+                      className="w-5 shrink-0 pt-0.5 font-mono text-sm font-bold tabular-nums text-muted-foreground/70 transition-colors duration-300 group-hover:text-[color:var(--step-chalk)] sm:w-6 sm:text-base"
+                    >
                       {s.n}
                     </div>
                     <div className="min-w-0">
@@ -459,7 +483,10 @@ export function KeyClashLandingSectionsGrid({
                         {s.body}
                       </p>
                     </div>
-                    <div className="absolute top-0 left-0 bottom-0 w-[2px] bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top" />
+                    <div
+                      className="absolute top-0 bottom-0 left-0 w-[2px] origin-top scale-y-0 transition-transform duration-300 group-hover:scale-y-100"
+                      style={{ backgroundColor: "var(--step-chalk)" }}
+                    />
                   </motion.div>
                 ))}
               </div>
@@ -468,15 +495,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (2) CTA ── */}
-        <div className="relative flex min-w-0 items-center justify-center overflow-hidden px-4 py-10 sm:px-5 sm:py-14 md:px-6 md:py-[clamp(48px,8vw,80px)] lg:px-8">
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse at 60% 80%, oklch(0.80 0.124 305 / 0.12) 0%, transparent 60%)",
-            }}
-          />
-
+        <div className="flex min-w-0 items-center justify-center px-4 py-10 sm:px-5 sm:py-14 md:px-6 md:py-[clamp(48px,8vw,80px)] lg:px-8">
           <Wrap className="relative flex justify-center !px-0">
             <motion.div
               initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.96 }}
@@ -488,22 +507,26 @@ export function KeyClashLandingSectionsGrid({
                 padding: "clamp(28px,5vw,56px) clamp(20px,4vw,48px)",
               }}
             >
-              {(["tl", "tr", "bl", "br"] as const).map((c) => (
-                <div
-                  key={c}
-                  className="absolute w-4 h-4"
-                  style={{
-                    top: c[0] === "t" ? -1 : "auto",
-                    bottom: c[0] === "b" ? -1 : "auto",
-                    left: c[1] === "l" ? -1 : "auto",
-                    right: c[1] === "r" ? -1 : "auto",
-                    borderTop: c[0] === "t" ? "2px solid var(--primary)" : "none",
-                    borderBottom: c[0] === "b" ? "2px solid var(--primary)" : "none",
-                    borderLeft: c[1] === "l" ? "2px solid var(--primary)" : "none",
-                    borderRight: c[1] === "r" ? "2px solid var(--primary)" : "none",
-                  }}
-                />
-              ))}
+              {(["tl", "tr", "bl", "br"] as const).map((c, i) => {
+                const chalk = CTA_CORNER_CHALK[i];
+                const edge = `2px solid color-mix(in oklch, var(${chalk}) 52%, transparent)`;
+                return (
+                  <div
+                    key={c}
+                    className="absolute w-4 h-4 pointer-events-none"
+                    style={{
+                      top: c[0] === "t" ? -1 : "auto",
+                      bottom: c[0] === "b" ? -1 : "auto",
+                      left: c[1] === "l" ? -1 : "auto",
+                      right: c[1] === "r" ? -1 : "auto",
+                      borderTop: c[0] === "t" ? edge : "none",
+                      borderBottom: c[0] === "b" ? edge : "none",
+                      borderLeft: c[1] === "l" ? edge : "none",
+                      borderRight: c[1] === "r" ? edge : "none",
+                    }}
+                  />
+                );
+              })}
 
               <div className="mb-5">
                 <LiveTag>Ready to compile?</LiveTag>
@@ -525,8 +548,8 @@ export function KeyClashLandingSectionsGrid({
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98, y: 0 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "w-full rounded-[var(--radius)] py-4 font-mono text-base font-bold uppercase tracking-[0.18em] text-primary-foreground",
-                  "border border-white/15 bg-primary/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_8px_32px_-4px_oklch(0.80_0.124_305_/_0.35)] backdrop-blur-md",
+                  "w-full rounded-[var(--radius)] py-4 font-mono text-base font-bold uppercase tracking-[0.18em] text-page-chalk-fg",
+                  "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
                 )}
               >
                 Start dueling →
@@ -568,14 +591,17 @@ export function KeyClashLandingSectionsGrid({
                     className={cn(
                       "group relative flex gap-4 p-4 transition-colors duration-300 sm:gap-5 sm:p-6",
                       glass.panelSubtle,
-                      "hover:border-primary/25 hover:bg-primary/[0.06]",
+                      "hover:border-border hover:bg-muted/20",
                     )}
+                    style={{
+                      ["--feat-chalk" as string]: `var(${f.accentVar})`,
+                      boxShadow:
+                        "inset 0 -2px 0 0 color-mix(in oklch, var(--feat-chalk) 26%, transparent)",
+                    }}
                   >
                     <div
-                      className={cn(
-                        "font-mono text-[20px] font-bold w-10 shrink-0 pt-0.5 tabular-nums",
-                        f.colorClass,
-                      )}
+                      className="w-10 shrink-0 pt-0.5 font-mono text-[20px] font-bold tabular-nums"
+                      style={{ color: "var(--feat-chalk)" }}
                     >
                       {f.symbol}
                     </div>
@@ -587,7 +613,12 @@ export function KeyClashLandingSectionsGrid({
                         {f.desc}
                       </p>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                      style={{
+                        backgroundColor: "color-mix(in oklch, var(--feat-chalk) 88%, transparent)",
+                      }}
+                    />
                   </motion.div>
                 ))}
               </div>
@@ -596,15 +627,7 @@ export function KeyClashLandingSectionsGrid({
         </div>
 
         {/* ── (4) Leaderboard ── */}
-        <div className="relative flex min-w-0 flex-col justify-center px-4 py-10 sm:px-5 sm:py-14 md:px-6 lg:px-8 md:py-[clamp(64px,10vw,120px)]">
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse at 80% 20%, oklch(0.80 0.124 305 / 0.1) 0%, transparent 55%)",
-            }}
-          />
-
+        <div className="flex min-w-0 flex-col justify-center px-4 py-10 sm:px-5 sm:py-14 md:px-6 lg:px-8 md:py-[clamp(64px,10vw,120px)]">
           <Wrap className="relative !px-0">
             <motion.div
               initial="hidden"
@@ -664,13 +687,13 @@ export function KeyClashLandingSectionsGrid({
                           "hover:bg-white/[0.04]",
                           "grid-cols-[22px_minmax(0,1fr)_40px_36px_32px] sm:grid-cols-[28px_minmax(0,1fr)_48px_44px_40px] md:grid-cols-[32px_minmax(0,1fr)_56px_48px_44px]",
                           row.rank === 1 &&
-                            "bg-primary/[0.08] shadow-[inset_0_0_24px_-12px_oklch(0.80_0.124_305_/_0.25)]",
+                            "border-l-2 border-[color-mix(in_oklch,var(--chalk-amber)_55%,transparent)] bg-muted/35 shadow-[inset_0_0_20px_-10px_color-mix(in_oklch,var(--chalk-amber)_20%,transparent)]",
                         )}
                       >
                         <span
                           className={cn(
                             "font-bold tabular-nums",
-                            row.rank === 1 ? "text-secondary" : "text-muted-foreground",
+                            row.rank === 1 ? "text-[color:var(--chalk-amber)]" : "text-muted-foreground",
                           )}
                         >
                           {row.rank}
@@ -678,7 +701,7 @@ export function KeyClashLandingSectionsGrid({
                         <span
                           className={cn(
                             "truncate",
-                            row.rank === 1 ? "text-primary font-bold" : "text-foreground",
+                            row.rank === 1 && "font-bold",
                           )}
                         >
                           {row.user}

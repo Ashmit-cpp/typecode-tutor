@@ -22,6 +22,9 @@ const StatisticsPage = lazy(() =>
 const GamePage = lazy(() =>
   import("@/pages/game-page").then((mod) => ({ default: mod.GamePage }))
 );
+const DuelsHistoryPage = lazy(() =>
+  import("@/pages/duels-history-page").then((mod) => ({ default: mod.default }))
+);
 
 
 // Wrapper component for Duels page to handle hooks
@@ -54,7 +57,7 @@ function DuelsPageWrapper() {
   }
 
   return (
-    <MainLayout>
+    <MainLayout pageChalk="duel">
       <DuelsPage onEnterQueue={handleEnterQueue} />
     </MainLayout>
   );
@@ -69,9 +72,17 @@ export function AppRoutes() {
           <Route path="/" element={<DuelsPageWrapper />} />
           <Route path="/duels" element={<DuelsPageWrapper />} />
           <Route
+            path="/duels/history"
+            element={
+              <MainLayout pageChalk="history">
+                <DuelsHistoryPage />
+              </MainLayout>
+            }
+          />
+          <Route
             path="/game/:gameId"
             element={
-              <MainLayout>
+              <MainLayout pageChalk="duel">
                 <GamePage />
               </MainLayout>
             }
@@ -79,7 +90,7 @@ export function AppRoutes() {
           <Route
             path="/practice"
             element={
-              <PracticeLayout>
+              <PracticeLayout pageChalk="practice">
                 <PracticePage />
               </PracticeLayout>
             }
@@ -87,7 +98,7 @@ export function AppRoutes() {
           <Route
             path="/statistics"
             element={
-              <PracticeLayout>
+              <PracticeLayout pageChalk="stats">
                 <StatisticsPage />
               </PracticeLayout>
             }

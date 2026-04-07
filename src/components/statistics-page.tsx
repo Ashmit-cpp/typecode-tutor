@@ -1,11 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useClearStatistics, useTestResults } from "@/lib/convex-hooks";
+import { glassCardClassName, glassGhostButton, glassPrimaryButton } from "@/lib/glass-styles";
+import { cn } from "@/lib/utils";
 import {
   TrendingUp,
   Target,
@@ -17,6 +20,7 @@ import {
   Trash2,
   BarChart3,
   Timer,
+  ArrowLeft,
 } from "lucide-react";
 
 export function StatisticsPage() {
@@ -139,11 +143,13 @@ export function StatisticsPage() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-        <LoadingState 
-          label="Loading statistics..." 
-          helperText="Fetching your typing progress data"
-        />
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex min-h-[50vh] w-full flex-1 items-center justify-center">
+          <LoadingState
+            label="Loading statistics…"
+            helperText="Fetching your typing progress data"
+          />
+        </div>
       </div>
     );
   }
@@ -151,55 +157,98 @@ export function StatisticsPage() {
   // Handle error state
   if (error) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-        <div className="text-center py-12">
-          <div className="text-destructive">Failed to load statistics. Please try refreshing the page.</div>
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+        <div className="rounded-[var(--radius)] border border-destructive/30 bg-destructive/5 px-4 py-8 text-center font-mono text-sm text-destructive">
+          Failed to load statistics. Please try refreshing the page.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Typing Statistics</h1>
-          <p className="text-muted-foreground">
-            Track your typing progress and performance
-          </p>
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "kc-page-hero-icon-wrap mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] border",
+            )}
+            aria-hidden
+          >
+            <BarChart3 className="kc-page-hero-icon size-5" />
+          </div>
+          <div>
+            <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Typing Statistics
+            </h1>
+            <p className="kc-page-hero-subtitle mt-1 font-mono text-sm">
+              Track your typing progress and performance.
+            </p>
+          </div>
         </div>
-        {summary.totalTests > 0 && (
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
           <Button
             variant="outline"
-            size="sm"
-            onClick={handleClearStatistics}
-            className="text-destructive hover:text-destructive"
+            asChild
+            className={cn(
+              "w-full shrink-0 rounded-[var(--radius)] font-mono text-xs uppercase tracking-widest sm:w-auto",
+              glassGhostButton,
+            )}
           >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Clear All Data
+            <Link to="/practice" className="inline-flex items-center justify-center gap-2">
+              <ArrowLeft className="size-4" />
+              Practice
+            </Link>
           </Button>
-        )}
+          {summary.totalTests > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearStatistics}
+              className={cn(
+                "w-full rounded-[var(--radius)] font-mono text-xs uppercase tracking-widest sm:w-auto",
+                glassGhostButton,
+                "text-destructive hover:text-destructive",
+              )}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Clear all data
+            </Button>
+          )}
+        </div>
       </div>
 
       {summary.totalTests === 0 ? (
-        <Card className="bg-transparent backdrop-blur-sm flex items-center justify-center h-[calc(100vh-20rem)]">
-          <div className="text-center py-12">
-            <BarChart3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Statistics Yet</h3>
-            <p className="text-muted-foreground">Complete some typing tests to see your statistics here</p>
-          </div>
+        <Card className={glassCardClassName()}>
+          <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
+            <BarChart3 className="size-12 text-muted-foreground/50" aria-hidden />
+            <div>
+              <p className="font-medium text-foreground">No statistics yet</p>
+              <p className="mt-1 max-w-sm font-mono text-sm text-muted-foreground">
+                Complete some typing tests to see your stats here.
+              </p>
+            </div>
+            <Button
+              asChild
+              className={cn(
+                "rounded-[var(--radius)] font-mono text-xs uppercase tracking-widest",
+                glassPrimaryButton,
+              )}
+            >
+              <Link to="/practice">Go to practice</Link>
+            </Button>
+          </CardContent>
         </Card>
       ) : (
         <>
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Tests
                 </CardTitle>
-                <Trophy className="h-4 w-4 text-muted-foreground" />
+                <Trophy className="h-4 w-4 text-chart-3" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{summary.totalTests}</div>
@@ -207,12 +256,12 @@ export function StatisticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Average WPM
                 </CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <TrendingUp className="h-4 w-4 text-page-chalk" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{summary.averageWpm}</div>
@@ -222,27 +271,27 @@ export function StatisticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Highest WPM
                 </CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
+                <Target className="h-4 w-4 text-chart-4" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-chart-4">
                   {summary.highestWpm}
                 </div>
                 <p className="text-xs text-muted-foreground">Personal best</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Time Spent
                 </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Clock className="h-4 w-4 text-secondary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -258,10 +307,10 @@ export function StatisticsPage() {
           {/* Mode-specific Statistics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Practice Mode Stats */}
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-green-500" />
+                  <FileText className="w-5 h-5 text-chart-4" />
                   Practice Mode Statistics
                 </CardTitle>
               </CardHeader>
@@ -282,7 +331,7 @@ export function StatisticsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-chart-4">
                       {summary.practiceTests.highestWpm}
                     </div>
                     <p className="text-sm text-muted-foreground">Best WPM</p>
@@ -298,10 +347,10 @@ export function StatisticsPage() {
             </Card>
 
             {/* Algorithm Mode Stats */}
-            <Card className="bg-transparent backdrop-blur-sm">
+            <Card className={glassCardClassName()}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5 text-blue-500" />
+                  <Code className="w-5 h-5 text-chart-2" />
                   Algorithm Mode Statistics
                 </CardTitle>
               </CardHeader>
@@ -322,7 +371,7 @@ export function StatisticsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-chart-2">
                       {summary.algorithmTests.highestWpm}
                     </div>
                     <p className="text-sm text-muted-foreground">Best WPM</p>
@@ -364,10 +413,10 @@ export function StatisticsPage() {
           </div>
 
           {/* Recent Tests */}
-          <Card className="bg-transparent backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
+          <Card className={glassCardClassName("p-3")}>
+            <CardHeader >
+              <CardTitle className="flex items-center gap-2 p-2">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 Recent Tests
               </CardTitle>
             </CardHeader>
@@ -381,9 +430,9 @@ export function StatisticsPage() {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
                         {test.mode === "algorithm" ? (
-                          <Code className="w-4 h-4 text-blue-500" />
+                          <Code className="w-4 h-4 text-chart-2" />
                         ) : (
-                          <FileText className="w-4 h-4 text-green-500" />
+                          <FileText className="w-4 h-4 text-chart-4" />
                         )}
                         <Badge
                           variant={

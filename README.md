@@ -1,214 +1,143 @@
 # KeyClash
 
-A modern typing practice and competitive platform built with React 19, TypeScript, and Vite. Practice typing, master algorithms, and prepare for real-time 1v1 typing duels.
+KeyClash is a typing practice app with real-time 1v1 duels. It is built with React 19, TypeScript, Vite, and a Convex backend. Users can drill on prose or algorithm snippets, review statistics, queue for matches, and race opponents in shared games.
 
-## 🎯 Features
+## Features
 
-### Core Modes
-- **Practice Mode**: Improve typing speed with curated text passages
-- **Algorithm Mode**: Practice typing code and common algorithms
-- **KeyClash Mode**: Real-time 1v1 typing duels (Coming Soon)
+- **Solo practice** (`/practice`): Switch between plain-text passages and algorithm-style code snippets; live WPM, accuracy, and progress.
+- **Statistics** (`/statistics`): Historical tests, charts, and per-mode breakdowns backed by Convex.
+- **Duels**: Landing at `/` and `/duels` with matchmaking; signed-in users join the queue and are routed to `/game/:gameId` for live head-to-head typing.
+- **Duel history** (`/duels/history`): Finished games and outcomes.
+- **Auth**: [Clerk](https://clerk.com/) for sign-in and user identity, wired to Convex via `ConvexProviderWithClerk`.
+- **Theming**: Light/dark mode (`next-themes`, default dark) with preference stored under `vite-ui-theme`.
+- **Responsive UI**: Mobile-first layouts, glass-style panels, and keyboard-friendly controls.
 
-### Features
-- ⚡ Live WPM, accuracy, and progress tracking
-- 📊 Comprehensive statistics and analytics page
-- 🎨 Light/dark theme with system preference support
-- 📱 Fully responsive design
-- ⌨️ Keyboard-friendly UI
-- 🔄 Real-time data sync with Convex
-- 🎯 Separate pages for each mode with routing
-- 🔐 Auth-ready header (prepared for Clerk integration)
+## Tech stack
 
-## 🛠️ Tech Stack
+| Area | Libraries |
+|------|-----------|
+| App | React 19, TypeScript, Vite 7, React Router 7 |
+| Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css` |
+| Backend | Convex (queries, mutations, real-time sync, matchmaking) |
+| Auth | `@clerk/clerk-react`, `@clerk/themes` (shadcn appearance) |
+| State | Zustand |
+| UI | Radix primitives, Lucide icons, Sonner toasts, Recharts |
+| Motion / 3D (landing) | Framer Motion, GSAP, React Three Fiber, Three.js |
 
-### Core
-- React 19 + TypeScript
-- Vite 7
-- React Router v7
-- Tailwind CSS v4
+## Prerequisites
 
-### State & Data
-- Zustand (state management)
-- Convex (backend & real-time sync)
+- **Node.js** 18 or newer (20+ recommended for tooling)
+- **pnpm** 9+ (the repo pins a version in `packageManager`; use `corepack enable` if needed)
+- **Convex** account for backend deployment and local dev
+- **Clerk** application with a publishable key (required at startup; see below)
 
-### UI Components
-- Radix UI primitives
-- ShadcnUI components
-- Lucide React icons
-- next-themes for theming
+## Getting started
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+ (recommended) or npm/yarn
-
-### Installation
+### 1. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### Development
+### 2. Environment variables
+
+Copy `.env.example` to `.env.local` and fill in values. The app **requires** at least:
+
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk publishable key (the app throws if this is missing).
+- `VITE_CONVEX_URL` — Convex deployment URL (from `convex dev` or the Convex dashboard).
+
+For authenticated Convex functions, configure Clerk JWT with Convex per [Convex + Clerk](https://docs.convex.dev/auth/clerk): set `CLERK_JWT_ISSUER_DOMAIN` (and mirror `VITE_CLERK_JWT_ISSUER_DOMAIN` where your tooling expects it). Server-side Convex env vars (for example `CLERK_SECRET_KEY` during deploy) belong in the Convex dashboard or local Convex env as documented in Convex setup guides.
+
+### 3. Run the stack
+
+Run the Vite app and Convex in two terminals:
 
 ```bash
-# Start the dev server
-pnpm dev
-
-# Start Convex development (in a separate terminal)
 pnpm convex:dev
 ```
 
-Then open the dev server URL printed in your terminal (usually `http://localhost:5173`).
-
-### Build for Production
-
 ```bash
-pnpm build
+pnpm dev
 ```
 
-The production build will be emitted to `dist/`.
+Open the URL Vite prints (typically `http://localhost:5173`).
 
-### Preview Production Build
+## Scripts
 
-```bash
-pnpm preview
-```
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Vite development server |
+| `pnpm build` | Deploys Convex and runs `build:vite` (codegen, `tsc`, Vite production build) |
+| `pnpm build:vite` | Convex codegen, TypeScript build, then Vite build (used inside deploy) |
+| `pnpm preview` | Serve the production build locally |
+| `pnpm lint` | ESLint |
+| `pnpm convex:dev` | Convex dev server (sync, codegen, local backend) |
+| `pnpm convex:deploy` | Deploy Convex functions |
+| `pnpm convex:codegen` | Generate Convex client types |
 
-## 📜 Scripts
+## Routes
 
-- `dev`: Start Vite dev server
-- `build`: Type-check and build for production
-- `lint`: Run ESLint
-- `preview`: Preview the production build
-- `convex:dev`: Start Convex development server
-- `convex:deploy`: Deploy Convex functions
+| Path | Description |
+|------|-------------|
+| `/`, `/duels` | KeyClash landing; queue for a duel when signed in |
+| `/practice` | Solo typing (text + algorithm modes) |
+| `/statistics` | Stats and history for practice tests |
+| `/game/:gameId` | Live duel session |
+| `/duels/history` | Finished duel history |
 
-## 🗂️ Project Structure
+There is no separate `/algorithm` route: **algorithm** practice is a mode inside `/practice` (same overlay, different content).
+
+## Project structure
 
 ```
 src/
-├── pages/                      # Page components
-│   ├── landing-page.tsx        # Home/landing page
-│   ├── practice-page.tsx       # Practice mode
-│   ├── algorithm-page.tsx      # Algorithm mode
-│   └── keyclash-page.tsx       # KeyClash (placeholder)
-├── components/                 # Reusable components
-│   ├── app-header.tsx          # Auth-aware header
-│   ├── typing-overlay.tsx      # Main typing interface
-│   ├── statistics-page.tsx     # Stats & analytics
-│   └── ui/                     # ShadcnUI components
-├── lib/                        # Utilities & stores
-│   ├── practice-store.ts       # Practice mode state
-│   ├── stats-store.ts          # Live stats state
-│   ├── statistics-store.ts     # Historical stats
-│   └── convex-hooks.ts         # Convex integration
-├── App.tsx                     # Main app with routing
-└── main.tsx                    # Entry point
+├── routes/
+│   └── app-routes.tsx       # Lazy-loaded routes, duel queue wrapper
+├── layouts/
+│   ├── MainLayout.tsx       # Duels, game, history shells
+│   └── PracticeLayout.tsx   # Practice + statistics shells
+├── pages/
+│   ├── keyclash-page.tsx    # Landing sections + navigation into queue/practice
+│   ├── practice-page.tsx
+│   ├── game-page.tsx
+│   └── duels-history-page.tsx
+├── components/
+│   ├── typing-overlay.tsx   # Core solo typing UI
+│   ├── statistics-page.tsx
+│   ├── landing/             # Marketing / hero sections
+│   ├── app-header.tsx
+│   └── ui/                    # Shared primitives (buttons, cards, etc.)
+├── lib/
+│   ├── practice-store.ts, stats-store.ts, statistics-store.ts
+│   ├── convex-hooks.ts      # Convex React hooks
+│   ├── game-hooks.ts        # Matchmaking / game helpers
+│   └── ...
+├── App.tsx                  # Theme, toaster, global Convex user settings
+└── main.tsx                 # Clerk + Convex providers
+
+convex/
+├── schema.ts                # testResults, userSettings, games, texts
+├── matchmaking.ts, game.ts, history.ts, functions.ts
+└── auth.config.ts           # Clerk JWT issuer for Convex auth
 ```
 
-## 🎨 Routing Structure
+## Path alias
 
-| Route | Component | Description |
-|-------|-----------|-------------|
-| `/` | LandingPage | Home page with feature overview |
-| `/practice` | PracticePage | Practice typing mode |
-| `/algorithm` | AlgorithmPage | Algorithm coding mode |
-| `/keyclash` | KeyClashPage | 1v1 duel mode (coming soon) |
-| `/statistics` | StatisticsPage | View stats & history |
-
-## 🔧 Aliases
-
-Vite alias `@` points to `src`.
+Vite resolves `@` to `src/`:
 
 ```ts
-// vite.config.ts
-resolve: {
-  alias: { '@': path.resolve(__dirname, './src') }
-}
+import { AppRoutes } from "@/routes/app-routes";
 ```
 
-Example import:
+## State and data
 
-```ts
-import { TypingOverlay } from '@/components/typing-overlay';
-```
+- **Zustand**: Practice mode, live session stats, and statistics UI state.
+- **Convex**: Persists test results, user settings, game/matchmaking documents, and duel history; subscriptions keep the UI in sync where used.
 
-## 🎨 Theming
+## Contributing
 
-The app uses `next-themes` with a lightweight `ThemeProvider`. Default theme is dark and preference is stored under `vite-ui-theme`. Toggle between light/dark mode using the theme switcher in the header.
+Pull requests are welcome. Please run `pnpm lint` and ensure the app builds (`pnpm build` or at least `pnpm build:vite` when not deploying) before submitting.
 
-## 📦 State Management
+## License
 
-Zustand stores provide minimal, predictable state:
-
-- `usePracticeModeStore`: Current mode (practice/algorithm) and typing state
-- `useStatsStore`: Live session stats surfaced to the UI
-- `useStatisticsStore`: Aggregated/historical statistics
-
-## 🔮 Upcoming Features
-
-### KeyClash Mode (Coming Soon)
-- Real-time 1v1 typing duels
-- Matchmaking system
-- Global leaderboards
-- ELO ranking system
-- Live opponent progress tracking
-
-### Authentication (Planned)
-- Clerk authentication integration
-- User profiles and progress tracking
-- Cross-device sync
-- Social features
-
-## 🛠️ Adding Authentication (Clerk)
-
-The header is already prepared for Clerk integration:
-
-1. Install Clerk:
-```bash
-pnpm add @clerk/clerk-react
-```
-
-2. Update `main.tsx`:
-```tsx
-import { ClerkProvider } from '@clerk/clerk-react';
-
-// Wrap app with ClerkProvider
-<ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
-  <App />
-</ClerkProvider>
-```
-
-3. Update `app-header.tsx`:
-```tsx
-import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/clerk-react';
-
-// Replace the placeholder auth section
-{user ? <UserButton /> : <SignInButton />}
-```
-
-## 📝 Environment Variables
-
-Create a `.env.local` file:
-
-```env
-# Convex
-VITE_CONVEX_URL=https://your-convex-deployment.convex.cloud
-
-# Clerk (when ready)
-# VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-MIT © 2025
-
----
-
-Built with ❤️ using React, TypeScript, and modern web technologies.
+MIT © 2026

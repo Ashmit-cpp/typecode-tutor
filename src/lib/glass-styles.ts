@@ -20,7 +20,7 @@ export const glass = {
 
 /** Primary CTA — matches landing hero primary */
 export const glassPrimaryButton =
-  "border border-white/15 bg-primary/85 text-primary-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_8px_32px_-4px_oklch(0.80_0.124_305_/_0.35)] backdrop-blur-md hover:bg-primary/95 hover:brightness-105";
+  "border border-white/15 bg-primary/85 text-primary-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),var(--shadow-primary-glow)] backdrop-blur-md hover:bg-primary/95 hover:brightness-105";
 
 /** Secondary / ghost — frosted neutral */
 export const glassGhostButton =

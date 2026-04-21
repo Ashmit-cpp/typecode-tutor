@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500;700&family=Fira+Code:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Azeret+Mono:wght@400;500;600;700&family=Overpass:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -77,9 +77,9 @@
   --sidebar-ring: oklch(0.3800 0.0500 245.0000);
 
   /* Typography */
-  --font-sans: "DM Sans", sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-mono: "Fira Code", monospace;
+  --font-sans: "Overpass", sans-serif;
+  --font-serif: "Archivo", sans-serif;
+  --font-mono: "Azeret Mono", monospace;
 
   /* Radius: slightly soft — slate is calm, not brutal */
   --radius: 0.25rem;
@@ -181,9 +181,9 @@
   --sidebar-border: oklch(0.3500 0.0440 243.0000);
   --sidebar-ring: oklch(0.9300 0.0120 240.0000);
 
-  --font-sans: "DM Sans", sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-mono: "Fira Code", monospace;
+  --font-sans: "Overpass", sans-serif;
+  --font-serif: "Archivo", sans-serif;
+  --font-mono: "Azeret Mono", monospace;
 
   --radius: 0.25rem;
 

@@ -26,6 +26,17 @@ const staggerContainer = (staggerChildren = 0.08, delayChildren = 0) => ({
 /** Viewport trigger defaults shared across sections */
 const inView = { once: true, amount: 0.18 } as const;
 
+const typography = {
+  eyebrow:
+    "font-mono text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground/82 sm:text-[0.74rem]",
+  micro:
+    "font-mono text-[0.7rem] font-medium uppercase tracking-[0.16em] text-muted-foreground/88",
+  body: "font-sans text-base leading-[1.72] tracking-[-0.012em] text-muted-foreground",
+  bodyCompact:
+    "font-sans text-[0.95rem] leading-[1.66] tracking-[-0.01em] text-muted-foreground",
+  button: "font-mono text-[0.79rem] font-semibold uppercase tracking-[0.18em]",
+} as const;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function Wrap({
@@ -55,12 +66,7 @@ function SectionLabel({
   className?: string;
 }) {
   return (
-    <p
-      className={cn(
-        "mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80 sm:mb-4",
-        className,
-      )}
-    >
+    <p className={cn("mb-3 sm:mb-4", typography.eyebrow, className)}>
       {children}
     </p>
   );
@@ -78,7 +84,7 @@ function SectionTitle({
   return (
     <h2
       className={cn(
-        "font-serif text-[clamp(2rem,4.2vw,3.4rem)] font-semibold tracking-[-0.055em] text-foreground leading-[0.96]",
+        "max-w-[11ch] text-balance font-serif text-[clamp(2.2rem,4.2vw,3.65rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-foreground",
         className,
       )}
       style={style}
@@ -140,7 +146,7 @@ function TerminalPreview() {
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-[min(100%,680px)] overflow-hidden",
+        "w-full min-w-0 max-w-[min(100%,730px)] overflow-hidden",
         glass.panel,
       )}
     >
@@ -159,7 +165,7 @@ function TerminalPreview() {
         />
         <span className="h-2.5 w-2.5 rounded-full bg-secondary/55 shadow-[0_0_6px_color-mix(in_oklch,var(--secondary)_40%,transparent)]" />
         <span className="flex-1" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/90 sm:text-xs">
+        <span className={cn(typography.micro, "text-muted-foreground/90")}>
           match_arena.ts
         </span>
       </div>
@@ -167,7 +173,7 @@ function TerminalPreview() {
       {/* Code */}
       <div
         className={cn(
-          "border-b px-4 py-5 font-mono text-[12px] leading-[1.8] whitespace-pre overflow-x-auto backdrop-blur-sm sm:px-6 sm:py-6 sm:text-[15px]",
+          "overflow-x-auto whitespace-pre border-b px-4 py-5 font-mono text-[0.82rem] leading-[1.82] tracking-[-0.02em] backdrop-blur-sm sm:px-6 sm:py-6 sm:text-[0.95rem]",
           glass.divider,
         )}
         style={{
@@ -197,21 +203,21 @@ function TerminalPreview() {
           },
         ].map((pl) => (
           <div key={pl.label}>
-            <div className="flex items-baseline justify-between mb-2">
+            <div className="mb-2 flex items-baseline justify-between">
               <span
-                className="font-mono text-[10px] sm:text-xs font-semibold uppercase tracking-[0.14em]"
+                className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] sm:text-[0.72rem]"
                 style={{ color: `var(${pl.colorVar})` }}
               >
                 {pl.label}
               </span>
               <div className="flex items-baseline gap-1.5">
                 <span
-                  className="font-mono text-[clamp(28px,5vw,38px)] font-bold leading-none tabular-nums"
+                  className="font-mono text-[clamp(2rem,5vw,2.65rem)] font-semibold leading-none tracking-[-0.04em] tabular-nums"
                   style={{ color: `var(${pl.colorVar})` }}
                 >
                   {pl.wpm}
                 </span>
-                <span className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                <span className="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted-foreground">
                   wpm
                 </span>
               </div>
@@ -247,29 +253,30 @@ function KeyClashLandingHeroContent({
 
   return (
     <Wrap className={cn("z-10 flex flex-1 items-center", wrapClassName)}>
-      <div className="grid w-full items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(360px,40rem)] lg:gap-x-[clamp(3rem,6vw,6rem)]">
+      <div className="grid w-full items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(400px,32rem)] lg:gap-x-[clamp(3rem,6vw,6rem)]">
         <motion.div
           variants={staggerContainer(0.1, 0.1)}
           initial="hidden"
           animate="visible"
-          className="min-w-0"
         >
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="mt-0"
           >
-            <KeyClashWordmark className="font-serif text-lg font-semibold tracking-[-0.04em] text-foreground" />
+            <KeyClashWordmark className="font-serif text-[1.12rem] font-semibold tracking-[-0.05em] text-foreground" />
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="font-mono text-5xl lg:text-7xl font-semibold tracking-[-0.04em] leading-[1.05]"
+            className="max-w-[8ch] text-balance font-serif text-[clamp(3.45rem,8vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-foreground"
           >
-            <span className="block text-page-chalk/85">Real</span>
+            <span className="block text-page-chalk">Real</span>
             <TextType
-              text={["Syntax", "Time", "Snippets", "Opponents"]}
+              as="span"
+              className="block text-white"
+              text={["Syntax", "Time", "Snippets", "Players"]}
               typingSpeed={115}
               deletingSpeed={110}
               pauseDuration={1000}
@@ -281,7 +288,11 @@ function KeyClashLandingHeroContent({
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="mt-6 max-w-[36rem] font-mono text-[clamp(0.875rem,1.35vw,1.05rem)] leading-[1.75] tracking-[-0.01em] text-muted-foreground"
+            className={cn(
+              "mt-6 max-w-[34ch] text-balance sm:max-w-[38ch]",
+              typography.body,
+              "sm:text-[1.0625rem]",
+            )}
           >
             Competitive 1v1 typing on identical code snippets. Fast queue, live
             progress, clean finishes.
@@ -303,7 +314,8 @@ function KeyClashLandingHeroContent({
                 whileTap={shouldReduceMotion ? {} : { y: 0 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 font-mono text-sm font-bold uppercase tracking-[0.16em] text-page-chalk-fg transition-colors duration-200 sm:w-auto",
+                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 text-page-chalk-fg transition-colors duration-200 sm:w-auto",
+                  typography.button,
                   "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
                 )}
               >
@@ -312,7 +324,8 @@ function KeyClashLandingHeroContent({
               <button
                 onClick={onPracticeSolo}
                 className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 font-mono text-sm uppercase tracking-[0.16em] text-muted-foreground transition-all duration-200 sm:w-auto",
+                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 text-muted-foreground transition-all duration-200 sm:w-auto",
+                  typography.button,
                   "border-white/[0.12] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl",
                   "hover:border-secondary/40 hover:bg-secondary/[0.06] hover:text-foreground",
                 )}
@@ -345,13 +358,13 @@ function KeyClashLandingHeroContent({
                   i > 0 && "sm:border-l sm:border-white/[0.08] sm:pl-6",
                 )}
               >
-                <div className="font-mono text-[clamp(22px,3.5vw,28px)] font-bold leading-none tabular-nums text-foreground">
+                <div className="font-mono text-[clamp(1.8rem,3.5vw,2.35rem)] font-semibold leading-none tracking-[-0.04em] tabular-nums text-foreground">
                   {v}
                 </div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {l}
-                </div>
-                <div className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground">
+                <div className={cn("mt-2", typography.micro)}>{l}</div>
+                <div
+                  className={cn("mt-2 max-w-[22ch]", typography.bodyCompact)}
+                >
                   {detail}
                 </div>
               </motion.div>
@@ -360,14 +373,13 @@ function KeyClashLandingHeroContent({
         </motion.div>
 
         <motion.div
-          className="min-w-0 lg:justify-self-end"
           initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.65, ease: "easeOut", delay: 0.25 }}
         >
           <div className="w-full space-y-3">
             <TerminalPreview />
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground text-center">
+            <p className={cn("text-center", typography.micro)}>
               Identical snippet. No home-field advantage.
             </p>
           </div>
@@ -438,16 +450,14 @@ export function KeyClashLandingSectionsGrid({
                           className="h-1.5 w-1.5 rounded-full"
                           style={{ backgroundColor: `var(${s.accentVar})` }}
                         />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-                          {s.n}
-                        </span>
+                        <span className={typography.eyebrow}>{s.n}</span>
                       </div>
 
                       <div className="grid gap-2 lg:grid-cols-[minmax(0,16rem)_1fr] lg:gap-x-6">
-                        <h3 className="font-serif text-[clamp(1.35rem,2vw,1.75rem)] font-semibold leading-[1] tracking-[-0.05em] text-foreground">
+                        <h3 className="max-w-[12ch] text-balance font-serif text-[clamp(1.45rem,2.1vw,1.9rem)] font-semibold leading-[0.96] tracking-[-0.05em] text-foreground">
                           {s.title}
                         </h3>
-                        <p className="max-w-[44rem] font-sans text-[15px] leading-[1.72] text-muted-foreground">
+                        <p className={cn("max-w-[46ch]", typography.body)}>
                           {s.body}
                         </p>
                       </div>
@@ -485,16 +495,21 @@ export function KeyClashLandingSectionsGrid({
                       className="border-t border-white/[0.08] pt-4 sm:pt-5"
                     >
                       <div
-                        className="font-mono text-[11px] uppercase tracking-[0.2em]"
+                        className="font-mono text-[0.74rem] font-semibold uppercase tracking-[0.2em]"
                         style={{ color: `var(${f.accentVar})` }}
                       >
                         {f.symbol}
                       </div>
 
-                      <h3 className="mt-3 font-serif text-[clamp(1.2rem,2vw,1.5rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-foreground">
+                      <h3 className="mt-3 max-w-[14ch] text-balance font-serif text-[clamp(1.3rem,2vw,1.65rem)] font-semibold leading-[0.96] tracking-[-0.045em] text-foreground">
                         {f.label}
                       </h3>
-                      <p className="mt-3 max-w-[34rem] font-sans text-[15px] leading-[1.72] text-muted-foreground">
+                      <p
+                        className={cn(
+                          "mt-3 max-w-[32ch]",
+                          typography.bodyCompact,
+                        )}
+                      >
                         {f.desc}
                       </p>
                     </motion.article>
@@ -517,7 +532,7 @@ export function KeyClashLandingSectionsGrid({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <SectionLabel className="mb-2">Global ranking</SectionLabel>
-                    <h3 className="font-serif text-[clamp(1.7rem,3vw,2.3rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-foreground">
+                    <h3 className="max-w-[10ch] text-balance font-serif text-[clamp(1.9rem,3vw,2.45rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-foreground">
                       Live leaderboard
                     </h3>
                   </div>
@@ -525,7 +540,7 @@ export function KeyClashLandingSectionsGrid({
               </div>
 
               <div className="px-3 py-3 sm:px-4">
-                <div className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] gap-x-2 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                <div className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] gap-x-2 px-3 py-2 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   <span>#</span>
                   <span>User</span>
                   <span className="text-right">ELO</span>
@@ -543,7 +558,7 @@ export function KeyClashLandingSectionsGrid({
                         ease: "easeOut",
                         delay: i * 0.04,
                       }}
-                      className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] items-center gap-x-2 rounded-[var(--radius)] border border-white/[0.04] bg-white/[0.02] px-3 py-3 font-mono text-xs transition-colors duration-150 hover:bg-white/[0.04]"
+                      className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] items-center gap-x-2 rounded-[var(--radius)] border border-white/[0.04] bg-white/[0.02] px-3 py-3 font-mono text-[0.79rem] tracking-[-0.015em] transition-colors duration-150 hover:bg-white/[0.04]"
                       style={
                         row.rank === 1
                           ? {
@@ -579,7 +594,7 @@ export function KeyClashLandingSectionsGrid({
                       <span className="text-right tabular-nums text-muted-foreground">
                         {row.wpm}
                       </span>
-                      <span className="text-right text-[10px] text-muted-foreground">
+                      <span className="text-right text-[0.68rem] text-muted-foreground">
                         {row.lang}
                       </span>
                     </motion.div>
@@ -589,7 +604,7 @@ export function KeyClashLandingSectionsGrid({
                 <motion.p
                   variants={fadeIn}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground leading-relaxed"
+                  className="mt-4 max-w-[34ch] font-mono text-[0.68rem] font-medium uppercase leading-[1.6] tracking-[0.14em] text-muted-foreground"
                 >
                   Illustrative only. Live ranks sync when season one opens.
                 </motion.p>
@@ -603,11 +618,11 @@ export function KeyClashLandingSectionsGrid({
               className="relative overflow-hidden rounded-[var(--radius)] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.018))] p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl sm:p-7"
             >
               <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-page-chalk/65 to-transparent" />
-              <h2 className="mt-5 font-serif text-[clamp(2rem,4vw,2.8rem)] font-semibold leading-[0.92] tracking-[-0.065em] text-foreground">
+              <h2 className="mt-5 max-w-[9ch] text-balance font-serif text-[clamp(2.15rem,4vw,3rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-foreground">
                 Queue for the next duel.
               </h2>
 
-              <p className="mt-4 font-sans text-[15px] leading-[1.72] text-muted-foreground">
+              <p className={cn("mt-4 max-w-[24ch]", typography.body)}>
                 Ranked matchmaking, identical code, instant pressure.
               </p>
 
@@ -621,14 +636,20 @@ export function KeyClashLandingSectionsGrid({
                 whileTap={shouldReduceMotion ? {} : { scale: 0.985, y: 0 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "mt-6 w-full rounded-[var(--radius)] py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] text-page-chalk-fg",
+                  "mt-6 w-full rounded-[var(--radius)] py-4 text-page-chalk-fg",
+                  typography.button,
                   "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
                 )}
               >
                 Start dueling
               </motion.button>
 
-              <div className="mt-5 grid gap-2 border-t border-white/[0.08] pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <div
+                className={cn(
+                  "mt-5 grid gap-2 border-t border-white/[0.08] pt-4",
+                  typography.micro,
+                )}
+              >
                 <span>Sign in required · Matchmaking &lt;10s</span>
               </div>
             </motion.section>

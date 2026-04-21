@@ -3,6 +3,7 @@ import { AppHeader } from "@/components/app-header";
 import { Footer } from "@/components/footer";
 import type { PageChalkId } from "@/lib/page-chalk";
 import { pageChalkCssValue, pageChalkFgCssValue } from "@/lib/page-chalk";
+import { LightRays } from "@/components/ui/light-rays";
 
 interface PracticeLayoutProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export default function PracticeLayout({ children, pageChalk }: PracticeLayoutPr
       >
         <div className="kc-app-bg-gradient absolute inset-0" />
         <div className="kc-app-bg-vignette absolute inset-0 z-[1]" />
+        <LightRays color={`color-mix(in srgb, ${pageChalkCssValue(pageChalk)} 32%, black)`} />
       </div>
 
       {/* App Shell */}

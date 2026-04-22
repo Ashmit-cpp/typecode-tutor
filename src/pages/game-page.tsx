@@ -17,6 +17,7 @@ import {
   glassGhostButton,
   glassPrimaryButton,
 } from "@/lib/glass-styles";
+import { getLocalPracticeIdentity } from "@/lib/local-practice-identity";
 import { cn } from "@/lib/utils";
 import type { Id } from "../../convex/_generated/dataModel";
 
@@ -408,6 +409,7 @@ export function GamePage() {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const { user } = useUser();
+  const localPracticeIdentity = useMemo(() => getLocalPracticeIdentity(), []);
   const gameConvexId = gameId ? (gameId as Id<"games">) : undefined;
   const game = useGame(gameConvexId);
   const updateProgress = useUpdateGameProgress();
@@ -421,9 +423,11 @@ export function GamePage() {
   const [clockNow, setClockNow] = useState(() => Date.now());
 
   const referenceText = game?.text ?? "";
+  const resolvedPlayerId = user?.id ?? localPracticeIdentity?.id;
+  const gameSource = game?.source ?? "human";
   const totalChars = referenceText.length;
-  const isPlayer1 = game?.player1.id === user?.id;
-  const isPlayer2 = game?.player2?.id === user?.id;
+  const isPlayer1 = game?.player1.id === resolvedPlayerId;
+  const isPlayer2 = game?.player2?.id === resolvedPlayerId;
   const currentPlayer = isPlayer1 ? game?.player1 : game?.player2;
   const opponent = isPlayer1 ? game?.player2 : game?.player1;
   const opponentProgressChars = Math.min(totalChars, Math.max(0, opponent?.progress ?? 0));
@@ -471,9 +475,9 @@ export function GamePage() {
     if (
       !gameConvexId ||
       game?.status !== "active" ||
-      !user ||
+      !resolvedPlayerId ||
       !(isPlayer1 || isPlayer2) ||
-      !startTime
+      (gameSource !== "bot" && !startTime)
     ) {
       return;
     }
@@ -481,7 +485,7 @@ export function GamePage() {
     const interval = setInterval(() => {
       updateProgress({
         gameId: gameConvexId,
-        userId: user.id,
+        userId: resolvedPlayerId,
         currentPosition: currentIndex,
         wpm: stats.wpm,
         accuracy: stats.accuracy,
@@ -496,7 +500,8 @@ export function GamePage() {
   }, [
     gameConvexId,
     game?.status,
-    user,
+    resolvedPlayerId,
+    gameSource,
     isPlayer1,
     isPlayer2,
     currentIndex,
@@ -561,11 +566,11 @@ export function GamePage() {
   }
 
   async function handleSurrender() {
-    if (!gameConvexId || !user) return;
+    if (!gameConvexId || !resolvedPlayerId) return;
 
     try {
-      await surrender({ gameId: gameConvexId, userId: user.id });
-      navigate("/duels");
+      await surrender({ gameId: gameConvexId, userId: resolvedPlayerId });
+      navigate(gameSource === "bot" ? "/practice" : "/duels");
     } catch (error) {
       console.error("Failed to surrender:", error);
     }
@@ -721,7 +726,7 @@ export function GamePage() {
   }
 
   if (game.status === "finished") {
-    const won = game.winnerId === user?.id;
+    const won = game.winnerId === resolvedPlayerId;
     const player1Stats = game.player1 as ResultPlayerStats;
     const player2Stats = game.player2 as ResultPlayerStats;
     const rivalName = isPlayer1 ? player2Stats.name : player1Stats.name;
@@ -803,22 +808,24 @@ export function GamePage() {
                   duelButtonClassName,
                   glassPrimaryButton,
                 )}
-                onClick={() => navigate("/duels")}
+                onClick={() => navigate(gameSource === "bot" ? "/practice" : "/duels")}
               >
-                Find Another Match
+                {gameSource === "bot" ? "Back To Practice" : "Find Another Match"}
               </Button>
-              <Button
-                variant="outline"
-                className={cn(
-                  "min-h-11 flex-1 sm:min-w-[160px]",
-                  duelButtonClassName,
-                  glassGhostButton,
-                )}
-                onClick={() => navigate("/duels/history")}
-              >
-                <History className="mr-2 size-4" aria-hidden />
-                Duel History
-              </Button>
+              {gameSource !== "bot" && (
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "min-h-11 flex-1 sm:min-w-[160px]",
+                    duelButtonClassName,
+                    glassGhostButton,
+                  )}
+                  onClick={() => navigate("/duels/history")}
+                >
+                  <History className="mr-2 size-4" aria-hidden />
+                  Duel History
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className={cn(

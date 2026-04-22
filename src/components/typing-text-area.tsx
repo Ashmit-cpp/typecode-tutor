@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, Trash2, CheckCircle } from "lucide-react";
+import { CheckCircle, Play, RotateCcw, Swords, Trash2 } from "lucide-react";
 import { CardContent } from "./ui/card";
 import type { TypingStats } from "@/lib/stats-store";
 
@@ -18,6 +18,7 @@ interface TypingTextAreaProps {
   stats: TypingStats;
   onReferenceTextChange: (text: string) => void;
   onStartTyping: () => void;
+  onStartBotMatch?: () => void;
   onResetTyping: () => void;
   onClearText: () => void;
   onTryAgain: () => void;
@@ -32,6 +33,7 @@ export function TypingTextArea({
   stats,
   onReferenceTextChange,
   onStartTyping,
+  onStartBotMatch,
   onResetTyping,
   onClearText,
   onTryAgain,
@@ -171,6 +173,17 @@ export function TypingTextArea({
               <Play className="w-4 h-4" />
               Start Typing
             </Button>
+            {onStartBotMatch && (
+              <Button
+                variant="outline"
+                onClick={onStartBotMatch}
+                disabled={!referenceText.trim()}
+                className="flex items-center gap-2 flex-1 sm:flex-none"
+              >
+                <Swords className="w-4 h-4" />
+                Practice vs Bot
+              </Button>
+            )}
             {referenceText && (
               <Button
                 variant="outline"

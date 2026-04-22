@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,8 +18,12 @@ import { getRandomAlgorithm } from "@/lib/algo-helper";
 import { useStatsStore } from "@/lib/stats-store";
 import type { TypingStats } from "@/lib/stats-store";
 import { useAddTestResult, useUpdateTypingMode } from "@/lib/convex-hooks";
+import { useCreateBotPracticeGame } from "@/lib/game-hooks";
+import { getLocalPracticeIdentity } from "@/lib/local-practice-identity";
 
 export function TypingOverlay() {
+  const navigate = useNavigate();
+  const { user } = useUser();
   const [referenceText, setReferenceText] = useState("");
   const [typedText, setTypedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,8 +32,17 @@ export function TypingOverlay() {
   const [currentAlgorithmName, setCurrentAlgorithmName] = useState<string | null>(null);
   const { mode: practiceMode, typingMode, setMode } = usePracticeModeStore();
   const addTestResult = useAddTestResult();
+  const createBotPracticeGame = useCreateBotPracticeGame();
   const updateTypingMode = useUpdateTypingMode();
   const { setStats } = useStatsStore();
+  const localPracticeIdentity = useMemo(() => getLocalPracticeIdentity(), []);
+
+  const practicePlayerId = user?.id ?? localPracticeIdentity?.id;
+  const practicePlayerName =
+    user?.fullName ??
+    user?.firstName ??
+    localPracticeIdentity?.name ??
+    "Local Runner";
 
   // Calculate typing statistics
   const stats = useMemo((): TypingStats => {
@@ -181,6 +195,29 @@ export function TypingOverlay() {
     setStats(null);
   };
 
+  const startBotPractice = async () => {
+    if (!referenceText.trim() || !practicePlayerId) {
+      return;
+    }
+
+    try {
+      const { gameId } = await createBotPracticeGame({
+        playerId: practicePlayerId,
+        playerName: practicePlayerName,
+        text: referenceText,
+        practiceMode,
+        algorithmName:
+          practiceMode === "algorithm"
+            ? currentAlgorithmName ?? undefined
+            : undefined,
+      });
+
+      navigate(`/game/${gameId}`);
+    } catch (error) {
+      console.error("Failed to create bot practice game:", error);
+    }
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -282,6 +319,7 @@ export function TypingOverlay() {
           stats={stats}
           onReferenceTextChange={setReferenceText}
           onStartTyping={startTyping}
+          onStartBotMatch={startBotPractice}
           onResetTyping={resetTyping}
           onClearText={clearText}
           onTryAgain={tryAgain}

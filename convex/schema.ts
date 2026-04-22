@@ -11,6 +11,13 @@ const playerState = v.object({
   completed: v.boolean(),  // Has finished typing?
 });
 
+const botProfile = v.object({
+  name: v.string(),
+  targetWpm: v.number(),
+  targetAccuracy: v.number(),
+  seed: v.number(),
+});
+
 export default defineSchema({
   testResults: defineTable({
     userId: v.optional(v.string()), 
@@ -54,12 +61,16 @@ export default defineSchema({
     // The Text content (Copied here so it never changes during game)
     text: v.string(),
     textSourceId: v.optional(v.string()), // Optional ref to 'texts' table
+    source: v.optional(v.union(v.literal("human"), v.literal("bot"))),
+    practiceMode: v.optional(v.union(v.literal("practice"), v.literal("algorithm"))),
+    algorithmName: v.optional(v.string()),
 
     // Player 1 (The Host / Creator)
     player1: playerState,
 
     // Player 2 (The Challenger) - Optional until matched
     player2: v.optional(playerState),
+    botProfile: v.optional(botProfile),
 
     // Metadata
     winnerId: v.optional(v.string()),

@@ -1,15 +1,23 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import type { QueryCtx, MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 
-// Helper to get user ID from auth context
-async function getUserId(ctx: QueryCtx | MutationCtx) {
+async function getAuthUserId(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
-  return identity?.subject; // Clerk user ID
+  return identity?.subject;
+}
+
+async function getResolvedUserId(
+  ctx: QueryCtx | MutationCtx,
+  localUserId?: string,
+) {
+  const authUserId = await getAuthUserId(ctx);
+  return authUserId ?? localUserId ?? undefined;
 }
 
 export const addTestResult = mutation({
   args: {
+    localUserId: v.optional(v.string()),
     mode: v.union(v.literal("practice"), v.literal("algorithm")),
     wpm: v.number(),
     accuracy: v.number(),
@@ -21,10 +29,18 @@ export const addTestResult = mutation({
     algorithmName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-    
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     const testResultId = await ctx.db.insert("testResults", {
-      ...args,
+      mode: args.mode,
+      wpm: args.wpm,
+      accuracy: args.accuracy,
+      timeElapsed: args.timeElapsed,
+      correctChars: args.correctChars,
+      totalChars: args.totalChars,
+      errors: args.errors,
+      textPreview: args.textPreview,
+      algorithmName: args.algorithmName,
       completedAt: Date.now(),
       userId: userId ?? undefined,
     });
@@ -34,15 +50,16 @@ export const addTestResult = mutation({
 
 // Get all test results for the current user
 export const getAllTestResults = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getUserId(ctx);
-    
+  args: {
+    localUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     if (!userId) {
-      // Return empty array for unauthenticated users
       return [];
     }
-    
+
     const results = await ctx.db
       .query("testResults")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -54,14 +71,16 @@ export const getAllTestResults = query({
 
 // Clear all statistics for the current user
 export const clearAllStatistics = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getUserId(ctx);
-    
+  args: {
+    localUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     if (!userId) {
-      throw new Error("Must be authenticated to clear statistics");
+      throw new Error("No practice identity available");
     }
-    
+
     const allResults = await ctx.db
       .query("testResults")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -77,23 +96,24 @@ export const clearAllStatistics = mutation({
 
 // Get user settings for the current user
 export const getUserSettings = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getUserId(ctx);
-    
+  args: {
+    localUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     if (!userId) {
-      // Return default settings for unauthenticated users
       return {
         practiceMode: "practice" as const,
         typingMode: "input" as const,
       };
     }
-    
+
     const settings = await ctx.db
       .query("userSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
-      
+
     return settings ?? {
       practiceMode: "practice" as const,
       typingMode: "input" as const,
@@ -104,21 +124,21 @@ export const getUserSettings = query({
 // Update practice mode for the current user
 export const updatePracticeMode = mutation({
   args: {
+    localUserId: v.optional(v.string()),
     practiceMode: v.union(v.literal("practice"), v.literal("algorithm")),
   },
   handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-    
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     if (!userId) {
-      // Allow updates for unauthenticated users (won't persist across sessions)
-      return "anonymous";
+      return "missing-user";
     }
-    
+
     const existingSettings = await ctx.db
       .query("userSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
-    
+
     if (existingSettings) {
       await ctx.db.patch(existingSettings._id, {
         practiceMode: args.practiceMode,
@@ -138,21 +158,21 @@ export const updatePracticeMode = mutation({
 // Update typing mode for the current user
 export const updateTypingMode = mutation({
   args: {
+    localUserId: v.optional(v.string()),
     typingMode: v.union(v.literal("input"), v.literal("typing")),
   },
   handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-    
+    const userId = await getResolvedUserId(ctx, args.localUserId);
+
     if (!userId) {
-      // Allow updates for unauthenticated users (won't persist across sessions)
-      return "anonymous";
+      return "missing-user";
     }
-    
+
     const existingSettings = await ctx.db
       .query("userSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
-    
+
     if (existingSettings) {
       await ctx.db.patch(existingSettings._id, {
         typingMode: args.typingMode,

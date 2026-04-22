@@ -54,6 +54,8 @@ export const listFinishedGamesForUser = query({
     }[] = [];
 
     for (const game of slice) {
+      if (game.source === "bot") continue;
+
       const isPlayer1 = game.player1.id === args.userId;
       const me = isPlayer1 ? game.player1 : game.player2;
       const them = isPlayer1 ? game.player2 : game.player1;

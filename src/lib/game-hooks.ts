@@ -40,6 +40,10 @@ export function useFindOrCreateGame() {
   return useMutation(api.matchmaking.findOrCreateGame);
 }
 
+export function useCreateBotPracticeGame() {
+  return useMutation(api.matchmaking.createBotPracticeGame);
+}
+
 /**
  * Finished duels for the signed-in user (merge of games as player1 and player2).
  */
@@ -49,4 +53,3 @@ export function useFinishedGamesForUser(userId: string | undefined) {
     userId ? { userId, limit: 50 } : "skip",
   );
 }
-

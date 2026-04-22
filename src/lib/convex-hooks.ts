@@ -1,12 +1,18 @@
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { useEffect } from "react";
-import { useStatisticsStore } from "./statistics-store";
-import { usePracticeModeStore } from "./practice-store";
+import { useMutation, useQuery } from "convex/react";
 
-// Hook to sync test results from Convex to local store
+import { api } from "../../convex/_generated/api";
+import { getLocalPracticeIdentity } from "./local-practice-identity";
+import { usePracticeModeStore } from "./practice-store";
+import { useStatisticsStore } from "./statistics-store";
+
+function getLocalUserId() {
+  return getLocalPracticeIdentity()?.id;
+}
+
 export function useTestResults() {
-  const results = useQuery(api.functions.getAllTestResults);
+  const localUserId = getLocalUserId();
+  const results = useQuery(api.functions.getAllTestResults, { localUserId });
   const setTestResults = useStatisticsStore((state) => state.setTestResults);
 
   useEffect(() => {
@@ -18,23 +24,44 @@ export function useTestResults() {
   return {
     data: results,
     isLoading: results === undefined,
-    error: null, // Convex handles errors internally, but we can add more sophisticated error handling later
+    error: null,
   };
 }
 
-// Hook to add test result
 export function useAddTestResult() {
-  return useMutation(api.functions.addTestResult);
+  const mutation = useMutation(api.functions.addTestResult);
+  const localUserId = getLocalUserId();
+
+  return async (args: {
+    mode: "practice" | "algorithm";
+    wpm: number;
+    accuracy: number;
+    timeElapsed: number;
+    correctChars: number;
+    totalChars: number;
+    errors: number;
+    textPreview: string;
+    algorithmName?: string;
+  }) => {
+    return mutation({
+      ...args,
+      localUserId,
+    });
+  };
 }
 
-// Hook to clear all statistics
 export function useClearStatistics() {
-  return useMutation(api.functions.clearAllStatistics);
+  const mutation = useMutation(api.functions.clearAllStatistics);
+  const localUserId = getLocalUserId();
+
+  return async () => {
+    return mutation({ localUserId });
+  };
 }
 
-// Hook to sync user settings from Convex to local store
 export function useUserSettings() {
-  const settings = useQuery(api.functions.getUserSettings);
+  const localUserId = getLocalUserId();
+  const settings = useQuery(api.functions.getUserSettings, { localUserId });
   const setMode = usePracticeModeStore((state) => state.setMode);
   const setTypingMode = usePracticeModeStore((state) => state.setTypingMode);
   const setIsLoaded = usePracticeModeStore((state) => state.setIsLoaded);
@@ -50,29 +77,28 @@ export function useUserSettings() {
   return {
     data: settings,
     isLoading: settings === undefined,
-    error: null, // Convex handles errors internally, but we can add more sophisticated error handling later
+    error: null,
   };
 }
 
-// Hook to update practice mode
 export function useUpdatePracticeMode() {
   const mutation = useMutation(api.functions.updatePracticeMode);
   const setMode = usePracticeModeStore((state) => state.setMode);
-  
-  return async (mode: 'practice' | 'algorithm') => {
-    setMode(mode); // Update local state immediately for responsiveness
-    await mutation({ practiceMode: mode });
+  const localUserId = getLocalUserId();
+
+  return async (mode: "practice" | "algorithm") => {
+    setMode(mode);
+    await mutation({ practiceMode: mode, localUserId });
   };
 }
 
-// Hook to update typing mode
 export function useUpdateTypingMode() {
   const mutation = useMutation(api.functions.updateTypingMode);
   const setTypingMode = usePracticeModeStore((state) => state.setTypingMode);
-  
-  return async (mode: 'input' | 'typing') => {
-    setTypingMode(mode); // Update local state immediately for responsiveness
-    await mutation({ typingMode: mode });
+  const localUserId = getLocalUserId();
+
+  return async (mode: "input" | "typing") => {
+    setTypingMode(mode);
+    await mutation({ typingMode: mode, localUserId });
   };
 }
-

@@ -27,5 +27,5 @@ export const glassGhostButton =
   "border border-white/[0.12] bg-white/[0.04] text-muted-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl hover:border-primary/35 hover:bg-primary/[0.08] hover:text-foreground";
 
 export function glassCardClassName(...extra: (string | undefined)[]) {
-  return cn("p-2 gap-0 overflow-hidden rounded-[var(--radius)] shadow-none", glass.panel, ...extra);
+  return cn("p-2 py-5 gap-0 overflow-hidden rounded-[var(--radius)] shadow-none", glass.panel, ...extra);
 }

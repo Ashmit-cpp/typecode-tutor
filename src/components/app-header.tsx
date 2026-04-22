@@ -13,6 +13,7 @@ import {
 } from "./ui/dropdown-menu";
 import { KeyClashWordmark } from "@/components/keyclash-wordmark";
 import {
+  getPageChalkIdFromPathname,
   navLinkActiveChalkClass,
   navLinkHoverChalkClass,
   type PageChalkId,
@@ -37,6 +38,8 @@ export function AppHeader() {
   const isDuelHistory = location.pathname === "/duels/history";
   const isPractice = location.pathname === "/practice";
   const isStats = location.pathname === "/statistics";
+  const activeBrandChalkClass =
+    navLinkActiveChalkClass[getPageChalkIdFromPathname(location.pathname)];
 
   const navLinkClass = (active: boolean, chalk: PageChalkId) =>
     cn(
@@ -54,8 +57,8 @@ export function AppHeader() {
           aria-label="KeyClash home"
           className="flex items-center gap-2 font-mono font-bold tracking-tight"
         >
-          <TerminalIcon className="size-6 text-secondary" />
-          <KeyClashWordmark className="text-lg" />
+          <TerminalIcon className={cn("size-6", activeBrandChalkClass)} />
+          <KeyClashWordmark className={cn("text-lg", activeBrandChalkClass)} />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

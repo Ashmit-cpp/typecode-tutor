@@ -10,9 +10,39 @@ function getLocalUserId() {
   return getLocalPracticeIdentity()?.id;
 }
 
+function isUnsupportedLocalUserIdError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    error.message.includes("ArgumentValidationError") &&
+    error.message.includes("localUserId") &&
+    error.message.includes("extra field")
+  );
+}
+
+async function mutateWithLocalUserFallback<
+  TArgs extends { localUserId?: string },
+  TResult,
+>(
+  mutation: (args: TArgs) => Promise<TResult>,
+  args: TArgs,
+) {
+  try {
+    return await mutation(args);
+  } catch (error) {
+    if (!args.localUserId || !isUnsupportedLocalUserIdError(error)) {
+      throw error;
+    }
+
+    const { localUserId: _unusedLocalUserId, ...legacyArgs } = args;
+    return mutation(legacyArgs as TArgs);
+  }
+}
+
 export function useTestResults() {
-  const localUserId = getLocalUserId();
-  const results = useQuery(api.functions.getAllTestResults, { localUserId });
+  const results = useQuery(api.functions.getAllTestResults, {});
   const setTestResults = useStatisticsStore((state) => state.setTestResults);
 
   useEffect(() => {
@@ -43,10 +73,12 @@ export function useAddTestResult() {
     textPreview: string;
     algorithmName?: string;
   }) => {
-    return mutation({
+    const payload = {
       ...args,
       localUserId,
-    });
+    };
+
+    return mutateWithLocalUserFallback(mutation, payload);
   };
 }
 
@@ -55,13 +87,12 @@ export function useClearStatistics() {
   const localUserId = getLocalUserId();
 
   return async () => {
-    return mutation({ localUserId });
+    return mutateWithLocalUserFallback(mutation, { localUserId });
   };
 }
 
 export function useUserSettings() {
-  const localUserId = getLocalUserId();
-  const settings = useQuery(api.functions.getUserSettings, { localUserId });
+  const settings = useQuery(api.functions.getUserSettings, {});
   const setMode = usePracticeModeStore((state) => state.setMode);
   const setTypingMode = usePracticeModeStore((state) => state.setTypingMode);
   const setIsLoaded = usePracticeModeStore((state) => state.setIsLoaded);
@@ -88,7 +119,7 @@ export function useUpdatePracticeMode() {
 
   return async (mode: "practice" | "algorithm") => {
     setMode(mode);
-    await mutation({ practiceMode: mode, localUserId });
+    await mutateWithLocalUserFallback(mutation, { practiceMode: mode, localUserId });
   };
 }
 
@@ -99,6 +130,6 @@ export function useUpdateTypingMode() {
 
   return async (mode: "input" | "typing") => {
     setTypingMode(mode);
-    await mutation({ typingMode: mode, localUserId });
+    await mutateWithLocalUserFallback(mutation, { typingMode: mode, localUserId });
   };
 }

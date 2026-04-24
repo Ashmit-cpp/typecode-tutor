@@ -4,6 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +21,17 @@ import type { TypingStats } from "@/lib/stats-store";
 import { useAddTestResult, useUpdateTypingMode } from "@/lib/convex-hooks";
 import { useCreateBotPracticeGame } from "@/lib/game-hooks";
 import { getLocalPracticeIdentity } from "@/lib/local-practice-identity";
+
+function isMissingBotPracticeMutation(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    error.message.includes("Could not find public function") &&
+    error.message.includes("matchmaking:createBotPracticeGame")
+  );
+}
 
 export function TypingOverlay() {
   const navigate = useNavigate();
@@ -215,6 +227,18 @@ export function TypingOverlay() {
       navigate(`/game/${gameId}`);
     } catch (error) {
       console.error("Failed to create bot practice game:", error);
+
+      if (isMissingBotPracticeMutation(error)) {
+        toast.message("Bot race is unavailable right now", {
+          description: "Starting solo typing instead. Deploy latest Convex backend to enable bot races.",
+        });
+        startTyping();
+        return;
+      }
+
+      toast.error("Failed to start bot race", {
+        description: "Please try again in a moment.",
+      });
     }
   };
 

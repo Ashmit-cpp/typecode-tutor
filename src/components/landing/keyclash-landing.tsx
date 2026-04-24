@@ -1,391 +1,432 @@
-import { useEffect, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
-import { KeyClashWordmark } from "@/components/keyclash-wordmark";
-import { glass } from "@/lib/glass-styles";
-import { FEATURES, MOCK_LEADERBOARD } from "./constants";
-import { STEPS } from "./constants";
+import { type ReactNode, useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+
+import { cn } from "@/lib/utils";
+import { STEPS } from "./constants";
 import TextType from "../TextType";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 18 },
   visible: { opacity: 1, y: 0 },
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
+const sectionInView = { once: true, amount: 0.22 } as const;
 
-/** Stagger container — children animate in sequence */
-const staggerContainer = (staggerChildren = 0.08, delayChildren = 0) => ({
+const stagger = (delayChildren = 0) => ({
   hidden: {},
-  visible: { transition: { staggerChildren, delayChildren } },
+  visible: { transition: { staggerChildren: 0.07, delayChildren } },
 });
 
-/** Viewport trigger defaults shared across sections */
-const inView = { once: true, amount: 0.18 } as const;
+const display = "font-serif uppercase";
+const label = "font-mono text-xs font-semibold uppercase text-secondary";
+const body = "text-base leading-7 text-muted-foreground";
 
-const typography = {
-  eyebrow:
-    "font-mono text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground/82 sm:text-[0.74rem]",
-  micro:
-    "font-mono text-[0.7rem] font-medium uppercase tracking-[0.16em] text-muted-foreground/88",
-  body: "font-sans text-base leading-[1.72] tracking-[-0.012em] text-muted-foreground",
-  bodyCompact:
-    "font-sans text-[0.95rem] leading-[1.66] tracking-[-0.01em] text-muted-foreground",
-  button: "font-mono text-[0.79rem] font-semibold uppercase tracking-[0.18em]",
-} as const;
+type CodeTone =
+  | "plain"
+  | "keyword"
+  | "string"
+  | "comment"
+  | "fn"
+  | "prop"
+  | "punct";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const syntaxClass: Record<CodeTone, string> = {
+  plain: "text-syn-plain",
+  keyword: "text-primary",
+  string: "text-secondary",
+  comment: "text-syn-comment",
+  fn: "text-syn-fn",
+  prop: "text-syn-prop",
+  punct: "text-syn-punct",
+};
+
+const matchCode: Array<Array<{ text: string; tone: CodeTone }>> = [
+  [
+    { text: "async", tone: "keyword" },
+    { text: " function ", tone: "plain" },
+    { text: "race", tone: "fn" },
+    { text: "(", tone: "punct" },
+    { text: "lane", tone: "prop" },
+    { text: ") {", tone: "punct" },
+  ],
+  [{ text: "  // same snippet, no excuses", tone: "comment" }],
+  [
+    { text: "  const", tone: "keyword" },
+    { text: " start ", tone: "plain" },
+    { text: "= ", tone: "punct" },
+    { text: "performance", tone: "prop" },
+    { text: ".", tone: "punct" },
+    { text: "now", tone: "fn" },
+    { text: "();", tone: "punct" },
+  ],
+  [
+    { text: "  while", tone: "keyword" },
+    { text: " (", tone: "punct" },
+    { text: "lane", tone: "prop" },
+    { text: ".", tone: "punct" },
+    { text: "cursor", tone: "prop" },
+    { text: " < ", tone: "punct" },
+    { text: "snippet", tone: "prop" },
+    { text: ".", tone: "punct" },
+    { text: "length", tone: "prop" },
+    { text: ") {", tone: "punct" },
+  ],
+  [
+    { text: "    await", tone: "keyword" },
+    { text: " lane.", tone: "plain" },
+    { text: "commit", tone: "fn" },
+    { text: "(", tone: "punct" },
+    { text: '"clean"', tone: "string" },
+    { text: ");", tone: "punct" },
+  ],
+  [{ text: "  }", tone: "punct" }],
+  [
+    { text: "  return", tone: "keyword" },
+    { text: " score(", tone: "fn" },
+    { text: "start", tone: "prop" },
+    { text: ");", tone: "punct" },
+  ],
+  [{ text: "}", tone: "punct" }],
+];
+
+const featureList = [
+  {
+    label: "Live duels",
+    copy: "Keystroke-by-keystroke pressure against a real opponent.",
+  },
+  {
+    label: "Ranked seasons",
+    copy: "ELO moves with every clean finish, streak, and collapse.",
+  },
+  {
+    label: "No filler",
+    copy: "Actual code syntax, no quotes, no word salad, no warmup theatre.",
+  },
+];
+
+const leaderboardRows = [
+  {
+    rank: "01",
+    user: "root_user",
+    elo: 2444,
+    wpm: 188,
+    tier: "Apex",
+    delta: "+24",
+    rowClass: "kc-rank-scan border-kc-apex-row-bd bg-kc-apex-row-bg",
+    badgeClass:
+      "border-kc-apex-badge-bd bg-kc-apex-badge-bg text-kc-apex-badge-fg",
+  },
+  {
+    rank: "02",
+    user: "pxl_c0der",
+    elo: 2319,
+    wpm: 181,
+    tier: "Elite",
+    delta: "+18",
+    rowClass: "border-kc-elite-row-bd bg-kc-elite-row-bg",
+    badgeClass:
+      "border-kc-elite-badge-bd bg-kc-elite-badge-bg text-kc-elite-badge-fg",
+  },
+  {
+    rank: "03",
+    user: "sudo_kid",
+    elo: 2143,
+    wpm: 174,
+    tier: "Hyped",
+    delta: "+09",
+    rowClass: "border-kc-hyped-row-bd bg-kc-hyped-row-bg",
+    badgeClass: "border-kc-hyped-badge-bd bg-kc-hyped-badge-bg text-primary",
+  },
+  {
+    rank: "04",
+    user: "v3x_on_that",
+    elo: 2037,
+    wpm: 169,
+    tier: "Grinder",
+    delta: "+05",
+    rowClass: "border-kc-base-row-bd bg-kc-base-row-bg",
+    badgeClass:
+      "border-kc-base-badge-bd bg-kc-base-badge-bg text-kc-base-badge-fg",
+  },
+  {
+    rank: "05",
+    user: "syntax_err",
+    elo: 1921,
+    wpm: 163,
+    tier: "Builder",
+    delta: "+02",
+    rowClass: "border-kc-base-row-bd bg-kc-base-row-bg",
+    badgeClass:
+      "border-kc-base-badge-bd bg-kc-base-badge-bg text-kc-base-badge-fg",
+  },
+  {
+    rank: "06",
+    user: "tab_out_er",
+    elo: 1809,
+    wpm: 158,
+    tier: "Rookie",
+    delta: "+01",
+    rowClass: "border-kc-base-row-bd bg-kc-base-row-bg",
+    badgeClass:
+      "border-kc-base-badge-bd bg-kc-base-badge-bg text-kc-base-badge-fg",
+  },
+];
 
 function Wrap({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
     <div
-      className={cn(
-        "mx-auto w-full min-w-0 max-w-[88rem] px-4 sm:px-6 lg:px-8 xl:px-10",
-        className,
-      )}
+      className={cn("mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8", className)}
     >
       {children}
     </div>
   );
 }
 
-function SectionLabel({
+function RaceButton({
   children,
+  onClick,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
+  onClick: () => void;
   className?: string;
 }) {
-  return (
-    <p className={cn("mb-3 sm:mb-4", typography.eyebrow, className)}>
-      {children}
-    </p>
-  );
-}
-
-function SectionTitle({
-  children,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <h2
-      className={cn(
-        "max-w-[11ch] text-balance font-serif text-[clamp(2.2rem,4.2vw,3.65rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-foreground",
-        className,
-      )}
-      style={style}
-    >
-      {children}
-    </h2>
-  );
-}
-
-/* ─────────────────────────── HERO ───────────────────────────────────────── */
-const SNIPPET = `function mergeSort<T>(arr: T[]): T[] {
-  if (arr.length <= 1) return arr;
-  const mid = Math.floor(arr.length / 2);
-  return merge(
-    mergeSort(arr.slice(0, mid)),
-    mergeSort(arr.slice(mid))
-  );
-}`;
-
-function TerminalPreview() {
-  const [typedLen, setTypedLen] = useState(0);
-  const [p1, setP1] = useState(0);
-  const [p2, setP2] = useState(0);
-  const [wpm1, setWpm1] = useState(0);
-  const [wpm2, setWpm2] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setTypedLen((n) => {
-        if (n >= SNIPPET.length) {
-          setP1(0);
-          setP2(0);
-          setWpm1(0);
-          setWpm2(0);
-          return 0;
-        }
-        return n + 1;
-      });
-      setP1((p) => Math.min(100, p + 0.9 + Math.random() * 0.5));
-      setP2((p) => Math.min(100, p + 0.65 + Math.random() * 0.4));
-      setWpm1((w) =>
-        Math.min(218, w < 10 ? w + 8 : w + 0.35 + Math.random() * 0.3),
-      );
-      setWpm2((w) =>
-        Math.min(196, w < 10 ? w + 6 : w + 0.28 + Math.random() * 0.25),
-      );
-    }, 78);
-    return () => clearInterval(t);
-  }, []);
-
-  const { typed, untyped } = useMemo(
-    () => ({
-      typed: SNIPPET.slice(0, typedLen),
-      untyped: SNIPPET.slice(typedLen),
-    }),
-    [typedLen],
-  );
-
-  return (
-    <div
-      className={cn(
-        "w-full min-w-0 max-w-[min(100%,730px)] overflow-hidden",
-        glass.panel,
-      )}
-    >
-      {/* Title bar */}
-      <div
-        className={cn(
-          "flex items-center gap-2 border-b px-3 py-3 sm:px-4 sm:py-3.5",
-          glass.divider,
-          "bg-white/[0.03] backdrop-blur-md",
-        )}
-      >
-        <span className="h-2.5 w-2.5 rounded-full bg-destructive/50 shadow-[var(--shadow-destructive-dot)]" />
-        <span
-          className="h-2.5 w-2.5 rounded-full"
-          style={{ background: "var(--landing-terminal-dot-warn)" }}
-        />
-        <span className="h-2.5 w-2.5 rounded-full bg-secondary/55 shadow-[0_0_6px_color-mix(in_oklch,var(--secondary)_40%,transparent)]" />
-        <span className="flex-1" />
-        <span className={cn(typography.micro, "text-muted-foreground/90")}>
-          match_arena.ts
-        </span>
-      </div>
-
-      {/* Code */}
-      <div
-        className={cn(
-          "overflow-x-auto whitespace-pre border-b px-4 py-5 font-mono text-[0.82rem] leading-[1.82] tracking-[-0.02em] backdrop-blur-sm sm:px-6 sm:py-6 sm:text-[0.95rem]",
-          glass.divider,
-        )}
-        style={{
-          background: "var(--landing-demo-code-gradient)",
-          minHeight: 188,
-        }}
-      >
-        <span style={{ color: "var(--syntax-typed)" }}>{typed}</span>
-        <span className="kc-cursor" />
-        <span style={{ color: "var(--syntax-untyped)" }}>{untyped}</span>
-      </div>
-
-      {/* Players */}
-      <div className="space-y-4 bg-gradient-to-b from-card/15 to-card/5 p-4 text-base backdrop-blur-md sm:space-y-5 sm:p-6">
-        {[
-          {
-            label: "you",
-            wpm: Math.round(wpm1),
-            pct: p1,
-            colorVar: "--primary",
-          },
-          {
-            label: "opponent",
-            wpm: Math.round(wpm2),
-            pct: p2,
-            colorVar: "--secondary",
-          },
-        ].map((pl) => (
-          <div key={pl.label}>
-            <div className="mb-2 flex items-baseline justify-between">
-              <span
-                className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] sm:text-[0.72rem]"
-                style={{ color: `var(${pl.colorVar})` }}
-              >
-                {pl.label}
-              </span>
-              <div className="flex items-baseline gap-1.5">
-                <span
-                  className="font-mono text-[clamp(2rem,5vw,2.65rem)] font-semibold leading-none tracking-[-0.04em] tabular-nums"
-                  style={{ color: `var(${pl.colorVar})` }}
-                >
-                  {pl.wpm}
-                </span>
-                <span className="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted-foreground">
-                  wpm
-                </span>
-              </div>
-            </div>
-            <div className="h-[2px] w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full transition-[width] duration-75 ease-linear"
-                style={{
-                  width: `${Math.min(100, pl.pct)}%`,
-                  background: `var(${pl.colorVar})`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface KeyClashLandingHeroProps {
-  onFindMatch: () => void;
-  onPracticeSolo: () => void;
-  wrapClassName?: string;
-}
-
-function KeyClashLandingHeroContent({
-  onFindMatch,
-  onPracticeSolo,
-  wrapClassName,
-}: KeyClashLandingHeroProps) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <Wrap className={cn("z-10 flex flex-1 items-center", wrapClassName)}>
-      <div className="grid w-full items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(400px,32rem)] lg:gap-x-[clamp(3rem,6vw,6rem)]">
-        <motion.div
-          variants={staggerContainer(0.1, 0.1)}
-          initial="hidden"
-          animate="visible"
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+      whileTap={shouldReduceMotion ? undefined : { y: 0, scale: 0.99 }}
+      transition={{ duration: 0.14 }}
+      className={cn(
+        "kc-race-cta relative inline-flex min-h-12 w-full items-center justify-center overflow-hidden rounded-sm px-4 py-3 font-mono text-sm font-semibold uppercase text-primary-foreground sm:min-h-14 sm:w-auto sm:px-6 sm:py-4 sm:text-base",
+        className,
+      )}
+    >
+      <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+        {children}
+        <ArrowRight className="size-3.5 sm:size-4" aria-hidden />
+      </span>
+    </motion.button>
+  );
+}
+
+function GhostButton({
+  children,
+  onClick,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex min-h-12 w-full items-center justify-center rounded-sm border border-border bg-background px-4 py-3 font-mono text-sm font-semibold uppercase text-syn-plain transition-colors hover:border-secondary/40 hover:text-foreground sm:min-h-14 sm:w-auto sm:px-6 sm:py-4 sm:text-base"
+    >
+      {children}
+    </button>
+  );
+}
+
+function LiveMatchPreview() {
+  const shouldReduceMotion = useReducedMotion();
+  const [opponentWpm, setOpponentWpm] = useState(176);
+  const [progress, setProgress] = useState(68);
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    const timer = window.setInterval(() => {
+      setOpponentWpm((wpm) => {
+        const next = wpm + Math.round(Math.random() * 6 - 2);
+        return Math.max(168, Math.min(194, next));
+      });
+      setProgress((current) =>
+        current > 93 ? 62 : current + 2 + Math.random() * 4,
+      );
+    }, 680);
+
+    return () => window.clearInterval(timer);
+  }, [shouldReduceMotion]);
+
+  return (
+    <div className="relative border border-border backdrop-blur-sm">
+      <div
+        className="kc-scan-surface/20 absolute inset-0 pointer-events-none"
+        aria-hidden
+      />
+
+      <div className="relative grid grid-cols-[1fr_auto_1fr] items-center border-b border-border bg-background/20">
+        <div className="min-w-0 px-3 py-4 sm:px-5">
+          <p className="truncate font-mono text-sm font-semibold uppercase text-foreground">
+            local_runner
+          </p>
+          <p className="mt-1 font-mono text-xs text-syn-punct">
+            <span className="text-accent">ready</span> / lane A
+          </p>
+        </div>
+
+        <div
+          className={cn(display, "px-4 text-3xl font-black text-foreground")}
         >
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="mt-0"
-          >
-            <KeyClashWordmark className="font-serif text-[1.12rem] font-semibold tracking-[-0.05em] text-foreground" />
-          </motion.div>
+          VS
+        </div>
 
-          <motion.h1
-            variants={fadeUp}
-            transition={{ duration: 0.55, ease: "easeOut" }}
-            className="max-w-[8ch] text-balance font-serif text-[clamp(3.45rem,8vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-foreground"
-          >
-            <span className="block text-page-chalk">Real</span>
-            <TextType
-              as="span"
-              className="block text-white"
-              text={["Syntax", "Time", "Snippets", "Players"]}
-              typingSpeed={115}
-              deletingSpeed={110}
-              pauseDuration={1000}
-              showCursor
-              cursorCharacter="_"
-            />
-          </motion.h1>
-
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className={cn(
-              "mt-6 max-w-[34ch] text-balance sm:max-w-[38ch]",
-              typography.body,
-              "sm:text-[1.0625rem]",
-            )}
-          >
-            Competitive 1v1 typing on identical code snippets. Fast queue, live
-            progress, clean finishes.
-          </motion.p>
-
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="mt-9 flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <motion.button
-                onClick={onFindMatch}
-                whileHover={
-                  shouldReduceMotion
-                    ? {}
-                    : { y: -1, filter: "brightness(1.05)" }
-                }
-                whileTap={shouldReduceMotion ? {} : { y: 0 }}
-                transition={{ duration: 0.15 }}
-                className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] px-7 py-3.5 text-page-chalk-fg transition-colors duration-200 sm:w-auto",
-                  typography.button,
-                  "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
-                )}
-              >
-                Find a match
-              </motion.button>
-              <button
-                onClick={onPracticeSolo}
-                className={cn(
-                  "inline-flex w-full cursor-pointer items-center justify-center rounded-[var(--radius)] border px-7 py-3.5 text-muted-foreground transition-all duration-200 sm:w-auto",
-                  typography.button,
-                  "border-white/[0.12] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl",
-                  "hover:border-secondary/40 hover:bg-secondary/[0.06] hover:text-foreground",
-                )}
-              >
-                Practice solo
-              </button>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={fadeIn}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mt-10 grid gap-4 border-t border-white/[0.08] pt-6 sm:grid-cols-3 sm:pt-8"
-          >
-            {[
-              ["24k+", "duels today", "always-on queue pressure"],
-              ["142", "avg wpm", "serious hands only"],
-              ["98", "countries", "global bragging rights"],
-            ].map(([v, l, detail], i) => (
-              <motion.div
-                key={l}
-                variants={fadeUp}
-                transition={{
-                  duration: 0.4,
-                  ease: "easeOut",
-                  delay: i * 0.07,
-                }}
-                className={cn(
-                  "py-1",
-                  i > 0 && "sm:border-l sm:border-white/[0.08] sm:pl-6",
-                )}
-              >
-                <div className="font-mono text-[clamp(1.8rem,3.5vw,2.35rem)] font-semibold leading-none tracking-[-0.04em] tabular-nums text-foreground">
-                  {v}
-                </div>
-                <div className={cn("mt-2", typography.micro)}>{l}</div>
-                <div
-                  className={cn("mt-2 max-w-[22ch]", typography.bodyCompact)}
-                >
-                  {detail}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.65, ease: "easeOut", delay: 0.25 }}
-        >
-          <div className="w-full space-y-3">
-            <TerminalPreview />
-            <p className={cn("text-center", typography.micro)}>
-              Identical snippet. No home-field advantage.
-            </p>
-          </div>
-        </motion.div>
+        <div className="min-w-0 px-3 py-4 text-right sm:px-5">
+          <p className="truncate font-mono text-sm font-semibold uppercase text-foreground">
+            stack_raid
+          </p>
+          <p className="mt-1 font-mono text-xs text-syn-punct">
+            <span className="tabular-nums text-primary">{opponentWpm}</span> wpm
+            / lane B
+          </p>
+        </div>
       </div>
-    </Wrap>
+
+      <div className="relative grid lg:grid-cols-[7rem_minmax(0,1fr)_7rem]">
+        <aside className="hidden border-r border-border bg-background/20 p-4 lg:block">
+          <Metric label="WPM" value="169" caption="+12 climb" />
+          <Metric label="ACC" value="99%" caption="clean" />
+          <Metric label="ERR" value="1" caption="recover" />
+        </aside>
+
+        <div className="min-w-0">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase text-syn-punct">
+                Match buffer
+              </p>
+              <p className="mt-1 font-mono text-sm font-semibold text-foreground">
+                auth_gate.tsx
+              </p>
+            </div>
+            <span className="font-mono text-xs font-semibold uppercase text-secondary">
+              live
+            </span>
+          </div>
+
+          <ol className="overflow-hidden p-3 font-mono text-xs leading-6 sm:p-5 sm:text-sm">
+            {matchCode.map((line, lineIndex) => (
+              <li
+                key={lineIndex}
+                className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3"
+              >
+                <span className="select-none text-right text-syn-linenum">
+                  {String(lineIndex + 1).padStart(2, "0")}
+                </span>
+                <span className="min-w-0 whitespace-pre overflow-hidden">
+                  {line.map((token, tokenIndex) => (
+                    <span
+                      key={`${lineIndex}-${tokenIndex}`}
+                      className={syntaxClass[token.tone]}
+                    >
+                      {token.text}
+                    </span>
+                  ))}
+                  {lineIndex === 4 && <span className="kc-cursor ml-1" />}
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="border-t border-border px-4 py-3">
+            <div className="flex items-center justify-between font-mono text-xs uppercase text-syn-punct">
+              <span>pressure</span>
+              <span className="tabular-nums">{Math.round(progress)}%</span>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden bg-kc-progress-track">
+              <div
+                className="h-full bg-secondary transition-[width] duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <aside className="hidden border-l border-border bg-background/20 p-4 lg:block">
+          <Metric
+            label="WPM"
+            value={String(opponentWpm)}
+            caption="+18 lead"
+            accent
+          />
+          <Metric label="ACC" value="96%" caption="stable" />
+          <Metric label="ERR" value="3" caption="risky" accent />
+        </aside>
+      </div>
+
+      <div className="relative grid grid-cols-2 border-t border-border lg:hidden">
+        <MiniMetric label="You" value="169 WPM" />
+        <MiniMetric label="Opponent" value={`${opponentWpm} WPM`} accent />
+      </div>
+    </div>
+  );
+}
+
+function Metric({
+  label: metricLabel,
+  value,
+  caption,
+  accent,
+}: {
+  label: string;
+  value: string;
+  caption: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="mb-7 last:mb-0">
+      <p className="font-mono text-xs font-semibold uppercase text-syn-punct">
+        {metricLabel}
+      </p>
+      <p
+        className={cn(
+          "mt-1 font-mono text-3xl font-semibold tabular-nums",
+          accent ? "text-primary" : "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-xs uppercase text-secondary">
+        {caption}
+      </p>
+    </div>
+  );
+}
+
+function MiniMetric({
+  label: metricLabel,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="border-r border-border p-4 last:border-r-0">
+      <p className="font-mono text-xs uppercase text-syn-punct">
+        {metricLabel}
+      </p>
+      <p
+        className={cn(
+          "mt-1 font-mono text-lg font-semibold",
+          accent ? "text-primary" : "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+    </div>
   );
 }
 
@@ -401,261 +442,299 @@ export function KeyClashLandingSectionsGrid({
   onStartDueling,
 }: KeyClashLandingSectionsGridProps) {
   const shouldReduceMotion = useReducedMotion();
+  const motionProps = shouldReduceMotion
+    ? { initial: "visible", animate: "visible" }
+    : { initial: "hidden", animate: "visible" };
 
   return (
-    <section className="mx-auto w-full min-w-0 max-w-[92rem] overflow-x-hidden">
-      <div className=" px-4 py-14 sm:px-6 sm:pt-6 sm:pb-20 lg:px-8 lg:pb-24">
-        <div className="h-full lg:h-[calc(100svh-5rem)] border-b border-white/[0.08] flex justify-center align-center">
-          <KeyClashLandingHeroContent
-            onFindMatch={onFindMatch}
-            onPracticeSolo={onPracticeSolo}
-          />
+    <section className="w-full overflow-x-hidden bg-transparent text-foreground">
+      <Wrap className="w-full h-[100dvh] lg:h-[90dvh] flex items-center justify-center">
+        <div className="py-12  w-full grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center h-full">
+          <motion.div
+            variants={stagger(0.04)}
+            {...motionProps}
+            className="max-w-xl lg:max-w-none"
+          >
+            <motion.p variants={fadeUp} className={label}>
+              live match / ranked lane / real code
+            </motion.p>
+            <motion.h1
+              variants={fadeUp}
+              className={cn(
+                display,
+                "mt-5 text-6xl font-black leading-none text-foreground sm:text-7xl lg:text-8xl",
+              )}
+            >
+              Real
+              <span className="block text-primary">
+                <TextType
+                  as="span"
+                  className="block"
+                  text={["Syntax", "Time", "Snippets", "Players"]}
+                  typingSpeed={115}
+                  deletingSpeed={110}
+                  pauseDuration={1000}
+                  showCursor
+                  cursorCharacter="_"
+                />
+              </span>
+            </motion.h1>
+
+            <motion.p variants={fadeUp} className={cn("mt-6 max-w-md", body)}>
+              Head-to-head code typing where speed only counts if your syntax
+              survives.
+            </motion.p>
+
+            <motion.div
+              variants={fadeUp}
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
+            >
+              <RaceButton onClick={onFindMatch}>Enter queue</RaceButton>
+              <GhostButton onClick={onPracticeSolo}>Practice lane</GhostButton>
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={
+              shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }
+            }
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+            className="min-w-0 lg:-mr-10 xl:-mr-20"
+          >
+            <LiveMatchPreview />
+          </motion.div>
         </div>
+      </Wrap>
 
-        <div className="mt-[clamp(3rem,6vw,5.5rem)] grid gap-y-[clamp(3.5rem,7vw,6rem)] xl:grid-cols-[minmax(0,1fr)_22rem] xl:gap-x-[clamp(2rem,4vw,4rem)]">
-          <div className="space-y-[clamp(4rem,7vw,7rem)]">
-            <motion.section
-              initial="hidden"
-              whileInView="visible"
-              viewport={inView}
-              variants={staggerContainer(0.05)}
+      <Wrap className="py-20">
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={sectionInView}
+          variants={stagger()}
+          className="grid gap-10 lg:grid-cols-[0.38fr_0.62fr]"
+        >
+          <div>
+            <p className={label}>match countdown</p>
+            <h2
+              className={cn(
+                display,
+                "mt-4 text-5xl font-black leading-none sm:text-6xl",
+              )}
             >
-              <div className="grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">
-                <motion.div
-                  variants={fadeUp}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                >
-                  <SectionLabel>How it works</SectionLabel>
-                  <SectionTitle className="max-w-[9ch]">
-                    Three rounds.
-                    <br />
-                    One winner.
-                  </SectionTitle>
-                </motion.div>
-
-                <motion.div
-                  variants={fadeUp}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className="border-t border-white/[0.08]"
-                >
-                  {STEPS.map((s) => (
-                    <motion.div
-                      key={s.n}
-                      variants={fadeUp}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="grid gap-4 border-b border-white/[0.08] py-6 sm:py-8 lg:grid-cols-[88px_minmax(0,1fr)] lg:gap-x-6"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{ backgroundColor: `var(${s.accentVar})` }}
-                        />
-                        <span className={typography.eyebrow}>{s.n}</span>
-                      </div>
-
-                      <div className="grid gap-2 lg:grid-cols-[minmax(0,16rem)_1fr] lg:gap-x-6">
-                        <h3 className="max-w-[12ch] text-balance font-serif text-[clamp(1.45rem,2.1vw,1.9rem)] font-semibold leading-[0.96] tracking-[-0.05em] text-foreground">
-                          {s.title}
-                        </h3>
-                        <p className={cn("max-w-[46ch]", typography.body)}>
-                          {s.body}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </motion.section>
-
-            <motion.section
-              initial="hidden"
-              whileInView="visible"
-              viewport={inView}
-              variants={staggerContainer(0.06)}
-            >
-              <div className="grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">
-                <motion.div
-                  variants={fadeUp}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                >
-                  <SectionLabel>What makes it different</SectionLabel>
-                  <SectionTitle className="max-w-[10ch]">
-                    Built for speed.
-                    <br />
-                    Designed for devs.
-                  </SectionTitle>
-                </motion.div>
-
-                <div className="grid gap-3 md:grid-cols-2">
-                  {FEATURES.map((f) => (
-                    <motion.article
-                      key={f.label}
-                      variants={fadeUp}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="border-t border-white/[0.08] pt-4 sm:pt-5"
-                    >
-                      <div
-                        className="font-mono text-[0.74rem] font-semibold uppercase tracking-[0.2em]"
-                        style={{ color: `var(${f.accentVar})` }}
-                      >
-                        {f.symbol}
-                      </div>
-
-                      <h3 className="mt-3 max-w-[14ch] text-balance font-serif text-[clamp(1.3rem,2vw,1.65rem)] font-semibold leading-[0.96] tracking-[-0.045em] text-foreground">
-                        {f.label}
-                      </h3>
-                      <p
-                        className={cn(
-                          "mt-3 max-w-[32ch]",
-                          typography.bodyCompact,
-                        )}
-                      >
-                        {f.desc}
-                      </p>
-                    </motion.article>
-                  ))}
-                </div>
-              </div>
-            </motion.section>
+              Three beats.
+              <span className="block text-secondary">One lane.</span>
+            </h2>
           </div>
 
-          <div className="space-y-5 xl:sticky xl:top-20 xl:self-start">
-            <motion.section
-              id="leaderboard"
-              initial="hidden"
-              whileInView="visible"
-              viewport={inView}
-              variants={staggerContainer(0.04)}
-              className="overflow-hidden rounded-[var(--radius)] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl"
-            >
-              <div className="border-b border-white/[0.08] px-4 py-4 sm:px-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <SectionLabel className="mb-2">Global ranking</SectionLabel>
-                    <h3 className="max-w-[10ch] text-balance font-serif text-[clamp(1.9rem,3vw,2.45rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-foreground">
-                      Live leaderboard
-                    </h3>
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-3 py-3 sm:px-4">
-                <div className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] gap-x-2 px-3 py-2 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  <span>#</span>
-                  <span>User</span>
-                  <span className="text-right">ELO</span>
-                  <span className="text-right">WPM</span>
-                  <span className="text-right">Lang</span>
-                </div>
-
-                <div className="mt-2 space-y-1.5">
-                  {MOCK_LEADERBOARD.map((row, i) => (
-                    <motion.div
-                      key={row.user}
-                      variants={fadeUp}
-                      transition={{
-                        duration: 0.32,
-                        ease: "easeOut",
-                        delay: i * 0.04,
-                      }}
-                      className="grid grid-cols-[22px_minmax(0,1fr)_46px_40px_34px] items-center gap-x-2 rounded-[var(--radius)] border border-white/[0.04] bg-white/[0.02] px-3 py-3 font-mono text-[0.79rem] tracking-[-0.015em] transition-colors duration-150 hover:bg-white/[0.04]"
-                      style={
-                        row.rank === 1
-                          ? {
-                              borderColor:
-                                "color-mix(in oklch, var(--chalk-amber) 34%, transparent)",
-                              backgroundColor:
-                                "color-mix(in oklch, var(--chalk-amber) 10%, transparent)",
-                            }
-                          : undefined
-                      }
-                    >
-                      <span
-                        className={cn(
-                          "font-bold tabular-nums",
-                          row.rank === 1
-                            ? "text-chalk-amber"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        {row.rank}
-                      </span>
-                      <span
-                        className={cn(
-                          "truncate",
-                          row.rank === 1 && "font-bold text-foreground",
-                        )}
-                      >
-                        {row.user}
-                      </span>
-                      <span className="text-right font-bold tabular-nums text-foreground">
-                        {row.elo}
-                      </span>
-                      <span className="text-right tabular-nums text-muted-foreground">
-                        {row.wpm}
-                      </span>
-                      <span className="text-right text-[0.68rem] text-muted-foreground">
-                        {row.lang}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <motion.p
-                  variants={fadeIn}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="mt-4 max-w-[34ch] font-mono text-[0.68rem] font-medium uppercase leading-[1.6] tracking-[0.14em] text-muted-foreground"
+          <div className="relative border-l-4 border-primary pl-6 sm:pl-9">
+            {STEPS.map((step, index) => (
+              <motion.article
+                key={step.n}
+                variants={fadeUp}
+                className={cn("relative pb-12 last:pb-0", index > 0 && "pt-2")}
+              >
+                <span
+                  className={cn(
+                    display,
+                    "pointer-events-none absolute -left-3 top-0 text-8xl font-black leading-none text-foreground/[0.06] sm:text-9xl",
+                  )}
                 >
-                  Illustrative only. Live ranks sync when season one opens.
-                </motion.p>
-              </div>
-            </motion.section>
-            <motion.section
-              initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.98 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={inView}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-              className="relative overflow-hidden rounded-[var(--radius)] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.018))] p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl sm:p-7"
-            >
-              <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-page-chalk/65 to-transparent" />
-              <h2 className="mt-5 max-w-[9ch] text-balance font-serif text-[clamp(2.15rem,4vw,3rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-foreground">
-                Queue for the next duel.
+                  {step.n}
+                </span>
+                <div className="relative">
+                  <p className="font-mono text-sm font-semibold uppercase text-primary">
+                    Stage {index + 1}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold text-foreground">
+                    {step.title}
+                  </h3>
+                  <p className={cn("mt-3 max-w-2xl", body)}>{step.body}</p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </motion.section>
+      </Wrap>
+
+      <Wrap className="py-14 sm:py-20">
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={sectionInView}
+          variants={stagger()}
+        >
+          <div className="grid gap-10 border-y border-border py-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <motion.div variants={fadeUp}>
+              <p className={label}>why it earns attention</p>
+              <h2
+                className={cn(
+                  display,
+                  "mt-4 text-5xl font-black leading-none sm:text-6xl",
+                )}
+              >
+                Real code.
+                <span className="block text-secondary">Race pressure.</span>
               </h2>
-
-              <p className={cn("mt-4 max-w-[24ch]", typography.body)}>
-                Ranked matchmaking, identical code, instant pressure.
+              <p className={cn("mt-6 max-w-xl", body)}>
+                KeyClash turns typing into a timing event: same snippet, visible
+                pace, ranked consequences, no decorative practice wheels.
               </p>
+            </motion.div>
 
-              <motion.button
-                onClick={onStartDueling}
-                whileHover={
-                  shouldReduceMotion
-                    ? {}
-                    : { y: -1, filter: "brightness(1.05)" }
-                }
-                whileTap={shouldReduceMotion ? {} : { scale: 0.985, y: 0 }}
-                transition={{ duration: 0.15 }}
-                className={cn(
-                  "mt-6 w-full rounded-[var(--radius)] py-4 text-page-chalk-fg",
-                  typography.button,
-                  "border border-white/15 bg-page-chalk/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_0_28px_-6px_color-mix(in_oklch,var(--page-chalk)_42%,transparent)] backdrop-blur-md",
-                )}
-              >
-                Start dueling
-              </motion.button>
-
-              <div
-                className={cn(
-                  "mt-5 grid gap-2 border-t border-white/[0.08] pt-4",
-                  typography.micro,
-                )}
-              >
-                <span>Sign in required · Matchmaking &lt;10s</span>
+            <motion.div
+              variants={fadeUp}
+              className="bg-background/20 backdrop-blur-sm p-4 font-mono text-sm"
+            >
+              <div className="border-b border-border pb-3 text-xs uppercase text-syn-punct">
+                race_control.rs
               </div>
-            </motion.section>
+              <pre className="mt-4 overflow-x-auto leading-7">
+                <code>
+                  <span className="text-primary">match</span>
+                  <span className="text-syn-plain"> lane.pressure() </span>
+                  <span className="text-syn-punct">{"{"}</span>
+                  {"\n  "}
+                  <span className="text-secondary">Clean</span>
+                  <span className="text-syn-plain"> =&gt; rank.commit(),</span>
+                  {"\n  "}
+                  <span className="text-secondary">Panic</span>
+                  <span className="text-syn-plain"> =&gt; elo.bleed(),</span>
+                  {"\n"}
+                  <span className="text-syn-punct">{"}"}</span>
+                </code>
+              </pre>
+            </motion.div>
           </div>
-        </div>
-      </div>
+
+          <div className="mt-8">
+            {featureList.map((feature) => (
+              <motion.div
+                key={feature.label}
+                variants={fadeUp}
+                className="grid gap-3 border-b border-border py-6 sm:grid-cols-[14rem_minmax(0,1fr)]"
+              >
+                <h3 className="text-xl font-semibold text-foreground">
+                  {feature.label}
+                </h3>
+                <p className={body}>{feature.copy}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      </Wrap>
+
+      <Wrap className="py-14 sm:py-20">
+        <motion.section
+          id="leaderboard"
+          initial="hidden"
+          whileInView="visible"
+          viewport={sectionInView}
+          variants={stagger()}
+          className="border border-border bg-kc-surface-deep p-4 sm:p-6 lg:p-8"
+        >
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className={cn(label, "flex items-center gap-2")}>
+                <span className="kc-live-pulse size-2 rounded-full bg-accent" />
+                Live rankings
+              </p>
+              <h2
+                className={cn(
+                  display,
+                  "mt-3 text-5xl font-black leading-none sm:text-6xl",
+                )}
+              >
+                Timing board
+              </h2>
+            </div>
+            <p className="max-w-sm font-mono text-sm text-syn-punct">
+              Updated every 30s across active ranked regions.
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-2">
+            {leaderboardRows.map((row) => (
+              <motion.article
+                key={row.user}
+                variants={fadeUp}
+                className={cn(
+                  "relative grid grid-cols-[2.5rem_minmax(0,1fr)_4rem] items-center gap-3 overflow-hidden border px-3 py-4 font-mono sm:grid-cols-[3rem_minmax(0,1fr)_5rem_5rem_6rem_3rem] sm:px-5",
+                  row.rowClass,
+                )}
+              >
+                <span className="font-semibold tabular-nums text-secondary">
+                  {row.rank}
+                </span>
+                <span className="min-w-0 truncate font-semibold text-foreground">
+                  {row.user}
+                </span>
+                <span className="text-right font-semibold tabular-nums text-foreground">
+                  {row.elo}
+                </span>
+                <span className="hidden text-right tabular-nums text-muted-foreground sm:block">
+                  {row.wpm}
+                </span>
+                <span
+                  className={cn(
+                    "hidden justify-self-end border px-3 py-1 text-xs font-semibold uppercase sm:inline-flex",
+                    row.badgeClass,
+                  )}
+                >
+                  {row.tier}
+                </span>
+                <span className="hidden text-right font-semibold text-accent sm:block">
+                  {row.delta}
+                </span>
+              </motion.article>
+            ))}
+          </div>
+        </motion.section>
+      </Wrap>
+
+      <section className="border-y border-border bg-card py-16 sm:py-20 lg:py-24">
+        <Wrap>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={sectionInView}
+            variants={stagger()}
+            className="mx-auto max-w-5xl text-center"
+          >
+            <motion.h2
+              variants={fadeUp}
+              className={cn(
+                display,
+                "text-6xl font-black leading-none text-foreground sm:text-7xl lg:text-8xl",
+              )}
+            >
+              Start on green.
+            </motion.h2>
+
+            <motion.div variants={fadeUp} className="mt-8 flex justify-center">
+              <RaceButton onClick={onStartDueling} className="sm:min-w-96">
+                Start dueling
+              </RaceButton>
+            </motion.div>
+
+            <motion.div
+              variants={fadeUp}
+              className="mt-8 flex flex-wrap justify-center gap-5 font-mono text-xs font-semibold uppercase text-muted-foreground"
+            >
+              <span>
+                <span className="text-accent">●</span> Live matches
+              </span>
+              <span>
+                <span className="text-secondary">●</span> Real code
+              </span>
+              <span>
+                <span className="text-primary">●</span> No bots
+              </span>
+            </motion.div>
+          </motion.div>
+        </Wrap>
+      </section>
     </section>
   );
 }
